@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 
-const SPOTIFY_CLIENT_ID = '50a01731e3b443d693a613063e476140'; // Replace this with your actual Spotify Client ID
+const SPOTIFY_CLIENT_ID = '50a01731e3b443d693a613063e476140'; // Replace this with your actual Spotify Client  ID
 const REDIRECT_URI = 'https://stationhead-clone.vercel.app'; // Replace with your deployed Vercel URL
 const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
 const RESPONSE_TYPE = 'token';
