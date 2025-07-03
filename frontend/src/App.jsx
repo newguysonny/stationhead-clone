@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 export default function App() { const [selectedRoom, setSelectedRoom] = useState(null); const [showModal, setShowModal] = useState(false); const [spotifyConnected, setSpotifyConnected] = useState(false); const [streaming, setStreaming] = useState(false); const [token, setToken] = useState("");
 
-const BACKEND_URL = "https://YOUR_BACKEND_URL_HERE"; // Replace with your Railway backend URL
+const BACKEND_URL = "https://stationhead-clone-production.up.railway.app"; // Replace with your Railway backend URL
 
 const rooms = [ { id: 1, name: "Afrobeats Party" }, { id: 2, name: "Hip-Hop Session" }, { id: 3, name: "Chill Vibes" }, ];
 
@@ -34,7 +34,7 @@ if (code) {
 
 }, []);
 
-const handleConnectSpotify = () => { const CLIENT_ID = "YOUR_SPOTIFY_CLIENT_ID"; const REDIRECT_URI = window.location.hostname === "localhost" ? "http://localhost:3000" : "https://stationhead-clone.vercel.app"; const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; const RESPONSE_TYPE = "code"; const SCOPES = "user-read-playback-state user-modify-playback-state streaming";
+const handleConnectSpotify = () => { const CLIENT_ID = "50a01731e3b443d693a613063e476140"; const REDIRECT_URI = window.location.hostname === "localhost" ? "http://localhost:3000" : "https://stationhead-clone.vercel.app"; const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; const RESPONSE_TYPE = "code"; const SCOPES = "user-read-playback-state user-modify-playback-state streaming";
 
 window.location = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&response_type=${RESPONSE_TYPE}&redirect_uri=${REDIRECT_URI}&scope=${encodeURIComponent(
   SCOPES
