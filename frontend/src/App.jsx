@@ -1,76 +1,59 @@
-import { useEffect, useState } from 'react';
-import './App.css';
+import { useState, useEffect } from 'react';
 
-const SPOTIFY_CLIENT_ID = '50a01731e3b443d693a613063e476140'; // Replace this with your actual Spotify Client  ID
-const REDIRECT_URI = 'https://stationhead-clone.vercel.app'; // Replace with your deployed Vercel URL
-const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
-const RESPONSE_TYPE = 'token';
+function App() { const [selectedRoom, setSelectedRoom] = useState(null); const [showModal, setShowModal] = useState(false); const [spotifyConnected, setSpotifyConnected] = useState(false); const [streaming, setStreaming] = useState(false); const [token, setToken] = useState('');
 
-export default function App() {
-  const [token, setToken] = useState('');
+useEffect(() => { const hash = window.location.hash; let _token = window.localStorage.getItem("spotify_token");
 
-  useEffect(() => {
-    const hash = window.location.hash;
-    let tokenFromStorage = window.localStorage.getItem('spotify_token');
-
-    if (!tokenFromStorage && hash) {
-      const urlParams = new URLSearchParams(hash.replace('#', '?'));
-      tokenFromStorage = urlParams.get('access_token');
-      window.localStorage.setItem('spotify_token', tokenFromStorage);
-      window.location.hash = '';
-    }
-
-    setToken(tokenFromStorage);
-  }, []);
-
-  const logout = () => {
-    setToken('');
-    window.localStorage.removeItem('spotify_token');
-  };
-
-  return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      background: 'black',
-      color: 'white'
-    }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '2rem' }}>Stationhead Clone</h1>
-
-      {!token ? (
-        <a
-          href={`${AUTH_ENDPOINT}?client_id=${SPOTIFY_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=user-read-playback-state user-modify-playback-state streaming`}
-          style={{
-            backgroundColor: '#1DB954',
-            padding: '0.75rem 1.5rem',
-            borderRadius: '9999px',
-            color: 'white',
-            textDecoration: 'none'
-          }}
-        >
-          Login with Spotify
-        </a>
-      ) : (
-        <div style={{ textAlign: 'center' }}>
-          <p>Logged in with Spotify!</p>
-          <button
-            onClick={logout}
-            style={{
-              marginTop: '1rem',
-              padding: '0.5rem 1rem',
-              borderRadius: '9999px',
-              backgroundColor: '#ff4d4d',
-              color: 'white',
-              border: 'none'
-            }}
-          >
-            Logout
-          </button>
-        </div>
-      )}
-    </div>
-  );
+if (!_token && hash) {
+  _token = hash.substring(1).split('&').find(elem => elem.startsWith("access_token")).split('=')[1];
+  window.location.hash = "";
+  window.localStorage.setItem("spotify_token", _token);
 }
+
+if (_token) {
+  setToken(_token);
+  setSpotifyConnected(true);
+}
+
+}, []);
+
+const handleConnectSpotify = () => { const CLIENT_ID = "50a01731e3b443d693a613063e476140"; const REDIRECT_URI = https://stationhead-clone.vercel.app; const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; const RESPONSE_TYPE = "token"; const SCOPES = "user-read-playback-state user-modify-playback-state streaming";
+
+window.location = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${encodeURIComponent(SCOPES)}`;
+
+};
+
+const rooms = [ { id: 1, name: "Afrobeats Party" }, { id: 2, name: "Hip-Hop Session" }, { id: 3, name: "Chill Vibes" }, ];
+
+if (streaming) { return <StreamingRoom room={selectedRoom} />; }
+
+return ( <div style={{ padding: '2rem', color: 'white', background: '#121212', minHeight: '100vh' }}> {!selectedRoom ? ( <div> <h1>Available Rooms</h1> <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}> {rooms.map(room => ( <div key={room.id} style={cardStyle} onClick={() => setSelectedRoom(room)}> {room.name} </div> ))} </div> </div> ) : ( <div> <h2>Room: {selectedRoom.name}</h2> <button onClick={() => setShowModal(true)} style={buttonStyle}>Start Listening</button> </div> )}
+
+{showModal && (
+    <SpotifyModal
+      spotifyConnected={spotifyConnected}
+      onConnect={handleConnectSpotify}
+      onStartStreaming={() => {
+        setShowModal(false);
+        setStreaming(true);
+      }}
+    />
+  )}
+</div>
+
+); }
+
+function SpotifyModal({ spotifyConnected, onConnect, onStartStreaming }) { return ( <div style={modalOverlayStyle}> <div style={modalStyle}> <h3>Connect Your Spotify</h3> {!spotifyConnected ? ( <button onClick={onConnect} style={buttonStyle}>Connect Spotify</button> ) : ( <div> <p style={{ color: 'lightgreen' }}>✅ Verified</p> <button onClick={onStartStreaming} style={buttonStyle}>Start Streaming</button> </div> )} </div> </div> ); }
+
+function StreamingRoom({ room }) { return ( <div style={{ padding: '2rem', color: 'white', background: '#121212', minHeight: '100vh' }}> <h1>Streaming Room: {room.name}</h1> <p>Music is now playing and synced!</p> </div> ); }
+
+const cardStyle = { background: '#282828', padding: '2rem', borderRadius: '0.5rem', cursor: 'pointer', textAlign: 'center', width: '150px', };
+
+const buttonStyle = { padding: '1rem 2rem', backgroundColor: '#1DB954', color: 'white', border: 'none', borderRadius: '0.5rem', fontSize: '1rem', cursor: 'pointer' };
+
+const modalOverlayStyle = { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center' };
+
+const modalStyle = { background: '#282828', padding: '2rem', borderRadius: '0.5rem', textAlign: 'center', };
+
+export default App;
+
