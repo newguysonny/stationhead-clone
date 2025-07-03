@@ -12,7 +12,12 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin:["https://stationhead-clone.vercel.app", "http://localhost:3000"],
+    origin:[
+  "https://stationhead-clone.vercel.app",
+  "stationhead-clone-git-main-newguysonnys-projects.vercel.app", //temp url
+  "https://*-newguysonnys-projects.vercel.app", // All branch deployments
+  "http://localhost:3000"
+],
     methods: ["GET", "POST"],
   },
 });
