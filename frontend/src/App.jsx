@@ -13,13 +13,34 @@ export default function StreamingRoom({ room }) {
   const [playbackData, setPlaybackData] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("spotify_token") || "");
 
-  useEffect(() => {
+  /* useEffect(() => {
     socket = io(SOCKET_URL);
 
     socket.on("connect", () => {
       console.log("Connected to socket.io:", socket.id);
       socket.emit("join-room", room.name);
-    });
+    }); */
+  
+  /*test only*/
+  useEffect(() => {
+  const socket = io("https://stationhead-clone-production.up.railway.app", {
+    reconnectionAttempts: 5,
+    timeout: 10000,
+  });
+
+  socket.on("connect", () => {
+    console.log("CONNECTED!", socket.id); // Should appear in browser console
+    socket.emit("join-room", "test-room");
+  });
+
+  socket.on("connect_error", (err) => {
+    console.error("Connection error:", err);
+  });
+
+  return () => socket.disconnect();
+}, []);
+  
+  /* test end*/
 
     socket.on("sync-playback", (data) => {
       console.log("Received playback sync:", data);
