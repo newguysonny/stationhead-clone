@@ -1,6 +1,22 @@
  require("dotenv").config(); const express = require("express"); const cors = require("cors"); const axios = require("axios");
+const { Server } = require('socket.io');
+const { createClient } = require('redis');
+const { createAdapter } = require('@socket.io/redis-adapter');
+const io = new Server();
+const app = express(); 
+app.use(cors()); 
+app.use(express.json());
 
-const app = express(); app.use(cors()); app.use(express.json());
+// Connect to Redis (works even if you only have 1 server)
+const pubClient = createClient(process.env.REDIS_URL || 'redis://localhost:6379');
+const subClient = pubClient.duplicate();
+
+io.adapter(createAdapter(pubClient, subClient)); // Add Redis Adapter
+
+// Your existing Socket.IO logic
+io.on('connection', (socket) => {
+  socket.emit('message', 'Hello from Redis-backed server!');
+});
 
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID; const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET; const REDIRECT_URI = process.env.REDIRECT_URI;
 
