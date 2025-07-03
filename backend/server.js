@@ -18,6 +18,7 @@ io.adapter(createAdapter(pubClient, subClient)); // Add Redis Adapter
 
 // Your existing Socket.IO logic
 io.on('connection', (socket) => {
+  console.log('New client connected');
   socket.emit('message', 'Hello from Redis-backed server!');
 });
 
