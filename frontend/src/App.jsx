@@ -17,9 +17,7 @@ if (_token) {
 
 }, []);
 
-const handleConnectSpotify = () => { const CLIENT_ID = "50a01731e3b443d693a613063e476140"; const REDIRECT_URI = window.location.hostname === "localhost"
-  ? "http://localhost:3000"
-  : "https://stationhead-clone.vercel.app"; const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; const RESPONSE_TYPE = "token"; const SCOPES = "user-read-playback-state user-modify-playback-state streaming";
+const handleConnectSpotify = () => { const CLIENT_ID = "50a01731e3b443d693a613063e476140"; const REDIRECT_URI = "https://stationhead-clone.vercel.app"; const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; const RESPONSE_TYPE = "token"; const SCOPES = "user-read-playback-state user-modify-playback-state streaming";
 
 window.location = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${encodeURIComponent(SCOPES)}`;
 
