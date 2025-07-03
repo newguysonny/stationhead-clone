@@ -25,4 +25,4 @@ res.json({
 
 } catch (err) { console.error(err.response?.data || err.message); res.status(500).json({ error: "Failed to exchange code for token" }); } });
 
-const PORT = process.env.PORT || 5000; app.listen(PORT, () => console.log(Server running on port ${PORT}));
+const PORT = process.env.PORT || 5000; app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
