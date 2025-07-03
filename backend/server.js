@@ -15,6 +15,19 @@ const pubClient = createClient(process.env.REDIS_URL || 'redis://localhost:6379'
 const subClient = pubClient.duplicate();
 
 io.adapter(createAdapter(pubClient, subClient)); // Add Redis Adapter
+console.log('Socket.IO Redis adapter active');
+
+// Verify adapter is working
+setInterval(() => {
+  io.emit('ping', Date.now());
+}, 5000);
+
+//test connect with client 
+const socket = io();
+socket.on('ping', (time) => {
+  console.log('Received ping:', time);
+});
+
 
 // Your existing Socket.IO logic
 io.on('connection', (socket) => {
