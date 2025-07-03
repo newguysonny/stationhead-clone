@@ -1,3 +1,4 @@
+// server.js
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -7,50 +8,38 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { createAdapter } = require("@socket.io/redis-adapter");
 
-// Initialize Express and HTTP server
 const app = express();
 const httpServer = createServer(app);
-
-// Configure Socket.IO with CORS
 const io = new Server(httpServer, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+  },
 });
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Environment variables
-const {
-  SPOTIFY_CLIENT_ID: CLIENT_ID,
-  SPOTIFY_CLIENT_SECRET: CLIENT_SECRET,
-  REDIRECT_URI,
-  REDIS_URL,
-  PORT = 5000
-} = process.env;
+const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
+const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
+const REDIRECT_URI = process.env.REDIRECT_URI;
+const REDIS_URL = process.env.REDIS_URL;
 
 // Initialize Redis client for general use
 const redisClient = createClient({ url: REDIS_URL });
-redisClient.connect()
-  .then(() => console.log("Connected to Redis"))
+redisClient.connect().then(() => console.log("Connected to Redis"))
   .catch((err) => console.error("Redis connection error:", err));
 
-// Initialize Redis clients for Socket.IO adapter
+// Initialize Redis clients for socket.io adapter
 const pubClient = createClient({ url: REDIS_URL });
 const subClient = createClient({ url: REDIS_URL });
+Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+  io.adapter(createAdapter(pubClient, subClient));
+  console.log("Socket.IO Redis adapter initialized");
+});
 
-Promise.all([pubClient.connect(), subClient.connect()])
-  .then(() => {
-    io.adapter(createAdapter(pubClient, subClient));
-    console.log("Socket.IO Redis adapter initialized");
-  });
-
-// Spotify token endpoint
 app.post("/auth/token", async (req, res) => {
-  const { code } = req.body;
+  const code = req.body.code;
 
   try {
     const params = new URLSearchParams();
@@ -60,26 +49,23 @@ app.post("/auth/token", async (req, res) => {
 
     const authHeader = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
 
-    const response = await axios.post(
-      "https://accounts.spotify.com/api/token",
-      params,
-      {
-        headers: {
-          "Authorization": `Basic ${authHeader}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
+    const response = await axios.post("https://accounts.spotify.com/api/token", params, {
+      headers: {
+        "Authorization": `Basic ${authHeader}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
 
-    const { access_token, refresh_token, expires_in } = response.data;
+    const accessToken = response.data.access_token;
+    const refreshToken = response.data.refresh_token;
 
     // Store tokens in Redis with a short TTL (optional)
-    await redisClient.setEx(access_token, 3600, JSON.stringify({ refresh_token }));
+    await redisClient.setEx(accessToken, 3600, JSON.stringify({ refreshToken }));
 
     res.json({
-      access_token,
-      refresh_token,
-      expires_in,
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_in: response.data.expires_in,
     });
 
   } catch (err) {
@@ -88,7 +74,6 @@ app.post("/auth/token", async (req, res) => {
   }
 });
 
-// Socket.IO event handlers
 io.on("connection", (socket) => {
   console.log("New client connected:", socket.id);
 
@@ -106,7 +91,5 @@ io.on("connection", (socket) => {
   });
 });
 
-// Start server
-httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 5000;
+httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
