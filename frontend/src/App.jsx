@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
 
-const SOCKET_URL = "https://stationhead-clone-production.up.railway.app";
+/* const SOCKET_URL = "https://stationhead-clone-production.up.railway.app";
+*/
+// Replace your SOCKET_URL with:
+const SOCKET_URL = window.location.protocol === 'https:' 
+  ? "https://stationhead-clone-production.up.railway.app" 
+  : "http://stationhead-clone-production.up.railway.app";
 
 let socket;
 
