@@ -1,10 +1,29 @@
+// In your main routing file (e.g., App.jsx)
+import { Routes, Route, Navigate } from 'react-router-dom';
+import SpotifyAuth from './pages/SpotifyAuth';
+import PlayerPage from './pages/PlayerPage';
+
+function App() {
+  const token = localStorage.getItem('spotify_token');
+
+  return (
+    <Routes>
+      <Route path="/auth" element={<SpotifyAuth />} />
+      <Route 
+        path="/player" 
+        element={token ? <PlayerPage /> : <Navigate to="/auth" />} 
+      />
+      <Route path="*" element={<Navigate to="/auth" />} />
+    </Routes>
+  );
+}
 
 
+/*
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
 
-/* const SOCKET_URL = "https://stationhead-clone-production.up.railway.app";
-*/
+
 // Replace your SOCKET_URL with:
 const SOCKET_URL = window.location.protocol === 'https:' 
   ? "https://stationhead-clone-production.up.railway.app" 
@@ -29,7 +48,8 @@ export default function StreamingRoom({ room }) {
       socket.emit("join-room", room.name);
     });
   
-  /*test error only*/
+  //test error only
+  
    socket.on("connect_error", (err) => {
     console.error("Connection error:", err);
   });
@@ -137,3 +157,4 @@ const buttonStyle = {
   fontSize: "1rem",
   cursor: "pointer",
 };
+*/
