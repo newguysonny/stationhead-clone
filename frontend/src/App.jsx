@@ -17,6 +17,7 @@ function App() {
     </Routes>
   );
 }
+export default App;
 
 /*
 import { useEffect, useState } from "react";
