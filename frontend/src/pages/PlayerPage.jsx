@@ -6,52 +6,58 @@ export default function PlayerPage() {
   const [player, setPlayer] = useState(null);
   const [deviceId, setDeviceId] = useState('');
   const token = localStorage.getItem('spotify_token');
-
-  // 1. Load Spotify Web Playback SDK
   useEffect(() => {
+    // 1. First check if SDK is already loaded
     if (window.Spotify) {
-      initPlayer();
+      initializePlayer();
       return;
     }
 
+    // 2. Setup callback BEFORE loading script
+    window.onSpotifyWebPlaybackSDKReady = initializePlayer;
+
+    // 3. Load the SDK script
     const script = document.createElement('script');
     script.src = 'https://sdk.scdn.co/spotify-player.js';
     script.async = true;
-    
-    script.onload = () => {
-      window.onSpotifyWebPlaybackSDKReady = initPlayer;
-    };
-
     document.body.appendChild(script);
 
     return () => {
       document.body.removeChild(script);
+      delete window.onSpotifyWebPlaybackSDKReady;
     };
   }, []);
 
-  // 2. Initialize Spotify Player
-  const initPlayer = () => {
+  const initializePlayer = () => {
     const newPlayer = new window.Spotify.Player({
       name: 'My Spotify Player',
-      getOAuthToken: cb => cb(token),
+      getOAuthToken: cb => cb(localStorage.getItem('spotify_token')),
       volume: 0.5
     });
 
-    newPlayer.addListener('ready', ({ device_id }) => {
-      console.log('Ready with Device ID', device_id);
-      setDeviceId(device_id);
-    });
-
+    // Error handling
     newPlayer.addListener('initialization_error', ({ message }) => {
       console.error('Init Error:', message);
     });
 
-    newPlayer.connect();
-    setPlayer(newPlayer);
+    newPlayer.addListener('ready', ({ device_id }) => {
+      console.log('Ready with Device ID:', device_id);
+      setPlayer(newPlayer);
+    });
 
-    return () => newPlayer.disconnect();
+    newPlayer.connect();
   };
 
+  if (!player) {
+    return <div>Loading Spotify player...</div>;
+  }
+
+  return (
+    <div>
+      <h1>Player Ready</h1>
+    </div>
+  );
+}
   // 3. Connect to Socket.IO
   useEffect(() => {
     if (!deviceId) return;
