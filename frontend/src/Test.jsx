@@ -41,23 +41,3 @@ export default function Test() {
   );
 }
 */
-
-// In your main routing file (e.g., App.jsx)
-import { Routes, Route, Navigate } from 'react-router-dom';
-import SpotifyAuth from './pages/SpotifyAuth';
-import PlayerPage from './pages/PlayerPage';
-
-function App() {
-  const token = localStorage.getItem('spotify_token');
-
-  return (
-    <Routes>
-      <Route path="/auth" element={<SpotifyAuth />} />
-      <Route 
-        path="/player" 
-        element={token ? <PlayerPage /> : <Navigate to="/auth" />} 
-      />
-      <Route path="*" element={<Navigate to="/auth" />} />
-    </Routes>
-  );
-}
