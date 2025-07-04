@@ -1,4 +1,4 @@
-// In your main routing file (e.g.., App.jsx)
+/* In your main routing file (e.g.., App.jsx)
 import { Routes, Route, Navigate } from 'react-router-dom';
 import SpotifyAuth from './pages/SpotifyAuth';
 import PlayerPage from './pages/PlayerPage';
@@ -17,9 +17,10 @@ function App() {
     </Routes>
   );
 }
-export default App;
+export default App; 
+*/
 
-/*
+
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
 
@@ -157,4 +158,4 @@ const buttonStyle = {
   fontSize: "1rem",
   cursor: "pointer",
 };
-*/
+export default App;
