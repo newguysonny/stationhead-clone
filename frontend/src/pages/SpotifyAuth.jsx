@@ -40,7 +40,7 @@ export default function SpotifyAuth() {
 
 async function exchangeCodeForToken(code) {
   try {
-    const response = await fetch('https://your-backend.com/auth/token', {
+    const response = await fetch('https://stationhead-clone-production.up.railway.app/auth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code })
