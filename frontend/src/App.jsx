@@ -158,4 +158,3 @@ const buttonStyle = {
   fontSize: "1rem",
   cursor: "pointer",
 };
-export default App;
