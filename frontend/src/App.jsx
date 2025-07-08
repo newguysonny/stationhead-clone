@@ -68,14 +68,6 @@ export default function StreamingRoom({ room }) {
     };
   }, [room, player]);
 
-  useEffect(() => {
-    if (token && window.Spotify) {
-      initializePlayer();
-    } else {
-      window.onSpotifyWebPlaybackSDKReady = initializePlayer;
-    }
-  }, [token]);
-
   const initializePlayer = () => {
     const _player = new window.Spotify.Player({
       name: "Stationhead Clone Player",
@@ -97,6 +89,33 @@ export default function StreamingRoom({ room }) {
     _player.connect();
   };
 
+/*
+useEffect(() => {
+  const waitForSpotify = setInterval(() => {
+    if (window.Spotify && token) {
+      clearInterval(waitForSpotify);
+      initializePlayer();
+    }
+  }, 100);
+
+  window.onSpotifyWebPlaybackSDKReady = () => {
+    if (token) initializePlayer();
+  };
+
+  return () => clearInterval(waitForSpotify);
+}, [token]);
+
+*/
+  
+  useEffect(() => {
+    if (token && window.Spotify) {
+      initializePlayer();
+    } else {
+      window.onSpotifyWebPlaybackSDKReady = initializePlayer;
+    }
+  }, [token]);
+
+  
   const sendPlaybackSync = () => {
     const data = {
       room: room.name,
