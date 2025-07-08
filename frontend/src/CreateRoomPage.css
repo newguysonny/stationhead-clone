@@ -1,0 +1,56 @@
+.create-room-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f3e8ff 0%, #e0f2fe 100%);
+  padding: 2rem 1rem;
+}
+
+.room-card {
+  max-width: 42rem;
+  margin: 0 auto;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.room-header {
+  background: linear-gradient(to right, #7c3aed, #3b82f6);
+  padding: 1.5rem;
+  color: white;
+}
+
+.form-section {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+.submit-btn {
+  width: 100%;
+  background-color: #7c3aed;
+  color: white;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+  background-color: #6d28d9;
+}
