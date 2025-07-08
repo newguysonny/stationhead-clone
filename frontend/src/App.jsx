@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
+import LoginPage from './pages/LoginPage';
+
+<Route path="/login" element={<LoginPage />} />
 
 const SOCKET_URL = window.location.protocol === 'https:' 
   ? "https://stationhead-clone-production.up.railway.app" 
