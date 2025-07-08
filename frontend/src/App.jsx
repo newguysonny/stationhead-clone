@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
+import CreateRoomPage from "./pages/CreateRoomPage";
 import StreamingRoom from "./components/StreamingRoom";
 
 export default function App() {
