@@ -1,26 +1,22 @@
 import { useState } from 'react';
 import { FiMusic, FiLock, FiUserPlus, FiDollarSign, FiImage, FiCheck, FiX } from 'react-icons/fi';
 
-type RoomType = 'fan' | 'verified';
-type PrivacyType = 'public' | 'private';
-type ThemeColor = 'blue' | 'red' | 'green';
-
 const CreateRoomPage = () => {
   // Form state
-  const [roomType, setRoomType] = useState<RoomType>('fan');
+  const [roomType, setRoomType] = useState('fan');
   const [artistName, setArtistName] = useState('');
   const [roomName, setRoomName] = useState('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState('');
   const [isSyncEnabled, setIsSyncEnabled] = useState(true);
-  const [foodPartner, setFoodPartner] = useState<string | 'none'>('none');
-  const [privacy, setPrivacy] = useState<PrivacyType>('public');
+  const [foodPartner, setFoodPartner] = useState('none');
+  const [privacy, setPrivacy] = useState('public');
   const [coHosts, setCoHosts] = useState([]);
   const [newCoHost, setNewCoHost] = useState('');
   const [enableTips, setEnableTips] = useState(false);
   const [sponsorRoom, setSponsorRoom] = useState(false);
-  const [themeColor, setThemeColor] = useState<ThemeColor>('blue');
+  const [themeColor, setThemeColor] = useState('blue');
 
   // Mock data
   const mockArtists = ['BTS', 'Taylor Swift', 'Drake', 'Sabrina Carpenter'];
@@ -41,15 +37,15 @@ const CreateRoomPage = () => {
     }
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
+  const handleRemoveTag = (tagToRemove) => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
-  const handleRemoveCoHost = (hostToRemove: string) => {
+  const handleRemoveCoHost = (hostToRemove) => {
     setCoHosts(coHosts.filter(host => host !== hostToRemove));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     // Here you would typically send data to your backend
     console.log({
@@ -222,7 +218,7 @@ const CreateRoomPage = () => {
           <label className="block text-sm font-medium mb-2">Food Partner</label>
           <select
             value={foodPartner}
-            onChange={(e) => setFoodPartner(e.target.value as string | 'none')}
+            onChange={(e) => setFoodPartner(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded bg-white"
           >
             <option value="none">No Food</option>
@@ -345,7 +341,7 @@ const CreateRoomPage = () => {
             <div>
               <p className="text-sm text-gray-600 mb-2">Theme Color</p>
               <div className="flex gap-3">
-                {(['blue', 'red', 'green'] as ThemeColor[]).map((color) => (
+                {['blue', 'red', 'green'].map((color) => (
                   <button
                     type="button"
                     key={color}
