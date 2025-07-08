@@ -66,10 +66,9 @@ const buttonStyle = {
 };
 */
 
-// src/pages/Login.jsx
+// src/pages/LoginPage.jsx
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 const CLIENT_ID = "50a01731e3b443d693a613063e476140";
 const REDIRECT_URI = "https://stationhead-clone-production.up.railway.app/callback";
