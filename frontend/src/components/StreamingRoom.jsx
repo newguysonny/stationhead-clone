@@ -64,6 +64,9 @@ export default function StreamingRoom({ room }) {
       _player.addListener("playback_error", ({ message }) => console.error(message));
 
       _player.connect();
+      _player.setVolume(1.0).then(() => {
+  console.log("Volume set to 100%");
+});
     };
 
     if (window.Spotify && token) {
