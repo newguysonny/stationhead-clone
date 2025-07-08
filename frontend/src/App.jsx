@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import StreamingRoom from "./components/StreamingRoom";
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <Routes>
