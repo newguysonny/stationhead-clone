@@ -72,7 +72,7 @@ export default function StreamingRoom({ room }) {
     }
   }, [token]);
 
-  const token = localStorage.getItem("spotify_token");
+  
 if (!token) {
   return <Navigate to="/login" />;
 }
