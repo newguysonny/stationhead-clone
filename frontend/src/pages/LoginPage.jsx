@@ -91,26 +91,63 @@ const AUTH_URL = `https://accounts.spotify.com/authorize?` +
 
 export default function Login() {
   const navigate = useNavigate();
+  
+useEffect(() => {
+  const code = new URLSearchParams(window.location.search).get("code");
 
+  if (code) {
+    // Exchange code for access token using fetch
+    fetch("https://stationhead-clone-production.up.railway.app/auth/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ code }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Token exchange failed");
+        return res.json();
+      })
+      .then(({ access_token }) => {
+        localStorage.setItem("spotify_token", access_token);
+        navigate("/room/default"); // Update this to match your route
+      })
+      .catch((err) => {
+        console.error("Failed to get token:", err);
+      });
+  }
+}, [navigate]);
+
+  
+/*
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
 
-    if (code) {
-      // Exchange code for access token
-      axios
-        .post("https://stationhead-clone-production.up.railway.app/auth/token", { code })
-        .then((res) => {
-          const { access_token } = res.data;
-          localStorage.setItem("spotify_token", access_token);
-          navigate("/room/default"); // or wherever your StreamingRoom route is
-        })
-        .catch((err) => {
-          console.error("Failed to get token:", err);
-        });
-    }
-  }, [navigate]);
 
+    // Called after user lands on your frontend with ?code=abc123
+async function exchangeSpotifyCode(code) {
+  try {
+    const res = await fetch("https://stationhead-clone-production.up.railway.app/auth/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ code }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch token");
+    }
+
+    const { access_token } = await res.json();
+    localStorage.setItem("spotify_token", access_token);
+    // ✅ Redirect or load next page
+  } catch (err) {
+    console.error("Error exchanging code:", err);
+  }
+}
+*/
   const handleLogin = () => {
     window.location.href = AUTH_URL;
   };
