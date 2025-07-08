@@ -16,7 +16,7 @@ const CreateRoomPage = () => {
   const [isSyncEnabled, setIsSyncEnabled] = useState(true);
   const [foodPartner, setFoodPartner] = useState<string | 'none'>('none');
   const [privacy, setPrivacy] = useState<PrivacyType>('public');
-  const [coHosts, setCoHosts] = useState<string[]>([]);
+  const [coHosts, setCoHosts] = useState([]);
   const [newCoHost, setNewCoHost] = useState('');
   const [enableTips, setEnableTips] = useState(false);
   const [sponsorRoom, setSponsorRoom] = useState(false);
