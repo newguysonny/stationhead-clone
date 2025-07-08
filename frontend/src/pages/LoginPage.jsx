@@ -1,9 +1,10 @@
 // src/pages/LoginPage.jsx
 
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-const CLIENT_ID = "50a01731e3b443d693a613063e476140"; // Replace this with your real Spotify Client ID
-const REDIRECT_URI = window.location.origin; // Handles local and Vercel URLs
+const CLIENT_ID = "50a01731e3b443d693a613063e476140"; // Replace this with your actual Spotify App client ID
+const REDIRECT_URI = window.location.origin;
 const SCOPES = [
   "streaming",
   "user-read-email",
@@ -15,17 +16,20 @@ const SCOPES = [
 const AUTH_URL = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPES.join(" "))}`;
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+
   useEffect(() => {
     const hash = window.location.hash;
     if (hash) {
       const token = new URLSearchParams(hash.substring(1)).get("access_token");
       if (token) {
         localStorage.setItem("spotify_token", token);
-        window.location.hash = ""; // Clean up the URL
-        window.location.reload();  // Reload app with token set
+        window.location.hash = "";
+        // 👇 Redirect to default room after login
+        navigate("/room/default", { replace: true }); 
       }
     }
-  }, []);
+  }, [navigate]);
 
   const handleLogin = () => {
     window.location.href = AUTH_URL;
