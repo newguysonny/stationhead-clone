@@ -82,7 +82,8 @@ if (!token) {
   const sendPlaybackSync = () => {
     const data = {
       room: room?.name,
-      track: "spotify:track:YOUR_TRACK_URI", // Replace with real track
+      /*track: "spotify:track:YOUR_TRACK_URI", // Replace with real track */
+      track: "spotify:track:7ouMYWpwJ422jRcDASZB7P", // Example: Bruno Mars – 24K Magic
       position: 0,
       isPlaying: true,
     };
