@@ -11,7 +11,7 @@ const CreateRoomPage = () => {
   const [artistName, setArtistName] = useState('');
   const [roomName, setRoomName] = useState('');
   const [description, setDescription] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState('');
   const [isSyncEnabled, setIsSyncEnabled] = useState(true);
   const [foodPartner, setFoodPartner] = useState<string | 'none'>('none');
