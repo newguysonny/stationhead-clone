@@ -15,7 +15,7 @@ export default function App() {
   );
 }
 
-// This wrapper helps extract room name from the URL
+// This wrapper helps extract rooms name from the URL
 import { useParams } from "react-router-dom";
 
 function StreamingRoomWrapper() {
