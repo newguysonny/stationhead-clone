@@ -43,6 +43,11 @@ Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
   console.log("Socket.IO Redis adapter initialized");
 });
 
+app.get("/callback", (req, res) => {
+  const code = req.query.code;
+  return res.redirect(`https://stationhead-clone.vercel.app/login?code=${code}`);
+});
+
 app.post("/auth/token", async (req, res) => {
   const code = req.body.code;
 
