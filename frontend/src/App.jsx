@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import CreateRoomPage from "./pages/CreateRoomPage";
 import StreamingRoom from "./components/StreamingRoom";
+import './styles/tailwind.output.css';
+
 
 export default function App() {
   return (
