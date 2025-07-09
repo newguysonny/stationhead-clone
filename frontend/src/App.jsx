@@ -3,6 +3,7 @@ import LoginPage from "./pages/LoginPage";
 import CreateRoomPage from "./pages/CreateRoomPage";
 import StreamingRoom from "./components/StreamingRoom";
 import './styles/tailwind.output.css';
+import './App.min.css'; // The processed version
 
 
 export default function App() {
