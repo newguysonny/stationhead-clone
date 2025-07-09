@@ -2,25 +2,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import CreateRoomPage from "./pages/CreateRoomPage";
 import StreamingRoom from "./components/StreamingRoom";
-import './styles/tailwind.output.css';
-import './App.min.css'; // The processed version
+/*import './styles/tailwind.output.css';*/
+import './App.css'; // The processed version
 
 
 
-export default function App() {
-  return (
-    <div className="bg-blue-100 p-8">
-      <h1 className="text-3xl font-bold text-blue-800">
-        Tailwind Test (blue)
-      </h1>
-      <div className="custom-red">
-        Custom CSS Test (should be red)
-      </div>
-    </div>
-  )
-}
 
-/*
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -40,4 +28,4 @@ function StreamingRoomWrapper() {
   const { name } = useParams();
   return <StreamingRoom room={{ name }} />;
 }
-*/
+
