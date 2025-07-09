@@ -11,7 +11,7 @@
     "socket.io-client": "^4.7.2"
   },
   "scripts": {
-    "build-css": "tailwindcss build src/styles/tailwind.css -o src/styles/tailwind.output.css --minify",
+     "build-css": "tailwindcss build src/styles/tailwind.css -o src/styles/tailwind.output.css && postcss /App.css -o /App.min.css",
     "watch-css": "tailwindcss build src/styles/tailwind.css -o src/styles/tailwind.output.css --watch",
     "prestart": "npm run build-css",
     "start": "react-scripts start",
