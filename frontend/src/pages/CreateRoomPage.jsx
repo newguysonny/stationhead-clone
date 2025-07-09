@@ -167,6 +167,202 @@ const CreateRoomPage = () => {
             />
           </div>
 
+          {/* Tags */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-2">Tags</label>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {tags.map((tag) => (
+              <div 
+                key={tag} 
+                className="bg-gray-200 px-2 py-1 rounded-full text-sm flex items-center"
+              >
+                #{tag}
+                <button 
+                  type="button"
+                  onClick={() => handleRemoveTag(tag)}
+                  className="ml-1 text-gray-500 hover:text-red-500"
+                >
+                  <FiX size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="flex">
+            <input
+              type="text"
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
+              placeholder="#R&B"
+              className="flex-1 p-2 border border-gray-300 rounded-l"
+            />
+            <button
+              type="button"
+              onClick={handleAddTag}
+              className="bg-purple-500 text-white px-4 rounded-r hover:bg-purple-600"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+
+        {/* Music Source */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+            <FiMusic className="text-gray-600" /> Music Source
+          </label>
+          <div className="flex items-center gap-4">
+            <button 
+              type="button"
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2"
+            >
+              <FiMusic /> Connect Spotify
+            </button>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isSyncEnabled}
+                onChange={() => setIsSyncEnabled(!isSyncEnabled)}
+                className="h-4 w-4 rounded text-purple-500 focus:ring-purple-500"
+              />
+              Sync Playback
+            </label>
+          </div>
+        </div>
+
+          {/* Privacy & Co-Hosts */}
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+              <FiLock className="text-gray-600" /> Privacy
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  checked={privacy === 'public'}
+                  onChange={() => setPrivacy('public')}
+                  className="h-4 w-4 text-purple-500 focus:ring-purple-500"
+                />
+                Public
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  checked={privacy === 'private'}
+                  onChange={() => setPrivacy('private')}
+                  className="h-4 w-4 text-purple-500 focus:ring-purple-500"
+                />
+                Private
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+              <FiUserPlus className="text-gray-600" /> Co-Hosts
+            </label>
+            <div className="flex">
+              <input
+                type="text"
+                value={newCoHost}
+                onChange={(e) => setNewCoHost(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddCoHost()}
+                placeholder="@username"
+                className="flex-1 p-2 border border-gray-300 rounded-l"
+              />
+              <button
+                type="button"
+                onClick={handleAddCoHost}
+                className="bg-purple-500 hover:bg-purple-600 text-white px-4 rounded-r"
+              >
+                Add
+              </button>
+            </div>
+            {coHosts.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {coHosts.map((host) => (
+                  <div 
+                    key={host} 
+                    className="bg-gray-200 px-2 py-1 rounded-full text-sm flex items-center"
+                  >
+                    {host}
+                    <button 
+                      type="button"
+                      onClick={() => handleRemoveCoHost(host)}
+                      className="ml-1 text-gray-500 hover:text-red-500"
+                    >
+                      <FiX size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Monetization */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+            <FiDollarSign className="text-gray-600" /> Monetization
+          </label>
+          <div className="flex flex-wrap gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={enableTips}
+                onChange={() => setEnableTips(!enableTips)}
+                className="h-4 w-4 rounded text-purple-500 focus:ring-purple-500"
+              />
+              Enable Tips
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={sponsorRoom}
+                onChange={() => setSponsorRoom(!sponsorRoom)}
+                className="h-4 w-4 rounded text-purple-500 focus:ring-purple-500"
+              />
+              Sponsor Room
+            </label>
+          </div>
+        </div>
+
+        {/* Customization */}
+        <div className="mb-8">
+          <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+            <FiImage className="text-gray-600" /> Customize
+          </label>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button 
+              type="button"
+              className="border border-gray-300 px-4 py-2 rounded hover:bg-gray-100 flex items-center justify-center gap-2"
+            >
+              <FiImage /> Upload Cover
+            </button>
+            <div>
+              <p className="text-sm text-gray-600 mb-2">Theme Color</p>
+              <div className="flex gap-3">
+                {['blue', 'red', 'green'].map((color) => (
+                  <button
+                    type="button"
+                    key={color}
+                    onClick={() => setThemeColor(color)}
+                    className={`w-8 h-8 rounded-full ${
+                      color === 'blue' ? 'bg-blue-500' :
+                      color === 'red' ? 'bg-red-500' : 'bg-green-500'
+                    } hover:opacity-90 ${
+                      themeColor === color ? 'ring-2 ring-offset-2 ring-purple-500' : ''
+                    }`}
+                    aria-label={`${color} theme`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+
           {/* ... (keep all other sections with similar styling improvements) ... */}
 
           {/* Submit Button */}
