@@ -11,8 +11,8 @@
     "socket.io-client": "^4.7.2"
   },
   "scripts": {
-     "build-css": "tailwindcss build src/styles/tailwind.css -o src/styles/tailwind.output.css && postcss /App.css -o /App.min.css",
-    "watch-css": "tailwindcss build src/styles/tailwind.css -o src/styles/tailwind.output.css --watch",
+    "build-css": "tailwindcss build src/styles/tailwind.css -o src/styles/tailwind.output.css && npx postcss src/App.css -o src/App.min.css",
+    "watch-css": "concurrently \"tailwindcss build src/styles/tailwind.css -o src/styles/tailwind.output.css --watch\" \"npx postcss src/App.css -o src/App.min.css --watch\"",
     "prestart": "npm run build-css",
     "start": "react-scripts start",
     "prebuild": "npm run build-css",
@@ -23,6 +23,9 @@
   "devDependencies": {
     "tailwindcss": "^3.3.0",
     "autoprefixer": "^10.4.0",
-    "postcss": "^8.4.0"
+    "postcss": "^8.4.0",
+    "postcss-cli": "^10.1.0",
+    "concurrently": "^8.2.2",
+    "cssnano": "^6.0.1"
   }
 }
