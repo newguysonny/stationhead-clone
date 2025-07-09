@@ -4,7 +4,7 @@ module.exports = {
     "./public/index.html"
   ],
   corePlugins: {
-    preflight: false, // Disables base styles but keeps other Tailwind features
+    preflight: false,
   },
   theme: {
     extend: {},
