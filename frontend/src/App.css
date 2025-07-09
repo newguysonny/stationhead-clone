@@ -4,3 +4,8 @@ body {
   font-family:
     sans-serif; 
 }
+.custom-red {
+  color: red;
+  font-weight: bold;
+  margin-top: 1rem;
+}
