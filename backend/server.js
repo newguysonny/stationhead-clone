@@ -7,11 +7,11 @@ const { createClient } = require("redis");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { createAdapter } = require("@socket.io/redis-adapter");
-const { createClient } = require("@supabase/supabase-js");
+const { createSuperbaseClient } = require("@supabase/supabase-js");
 
 
 //Database connection
-const supabase = createClient(
+const supabase = createSuperbaseClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_KEY
 )
