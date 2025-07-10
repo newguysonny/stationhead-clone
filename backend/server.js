@@ -10,28 +10,7 @@ const { createAdapter } = require("@socket.io/redis-adapter");
 const { createClient: createSuperbaseClient } = require("@supabase/supabase-js");
 
 
-//Database connection
-// Initialize Supabase
-const supabase = createSuperbaseClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
 
-// Test DB connection
-async function testConnection() {
-  const { data, error } = await supabase
-    .from('your_table_name') // Replace this with your actual table name
-    .select('*')
-    .limit(1);
-
-  if (error) {
-    console.error('❌ Supabase connection failed:', error.message);
-  } else {
-    console.log('✅ Supabase connected. Sample data:', data);
-  }
-}
-testConnection();
-// database connection ends here
 
 const app = express();
 const httpServer = createServer(app);
@@ -56,6 +35,12 @@ const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
 const REDIS_URL = process.env.REDIS_URL;
 
+// Initialize Supabase
+const supabase = createSuperbaseClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
+
 // Initialize Redis client for general use
 const redisClient = createClient({ url: REDIS_URL });
 redisClient.connect().then(() => console.log("Connected to Redis"))
@@ -68,6 +53,23 @@ Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
   io.adapter(createAdapter(pubClient, subClient));
   console.log("Socket.IO Redis adapter initialized");
 });
+
+//Database connection
+// Test DB connection
+async function testConnection() {
+  const { data, error } = await supabase
+    .from('your_table_name') // Replace this with your actual table name
+    .select('*')
+    .limit(1);
+
+  if (error) {
+    console.error('❌ Supabase connection failed:', error.message);
+  } else {
+    console.log('✅ Supabase connected. Sample data:', data);
+  }
+}
+testConnection();
+// database connection ends here
 
 app.get("/callback", (req, res) => {
   const code = req.query.code;
