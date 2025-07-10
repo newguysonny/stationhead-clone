@@ -45,7 +45,7 @@ const CreateRoomPage = () => {
     setCoHosts(coHosts.filter(host => host !== hostToRemove));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = {
       name: e.target.name.value,
