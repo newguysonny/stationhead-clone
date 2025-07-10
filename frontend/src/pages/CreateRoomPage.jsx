@@ -47,6 +47,20 @@ const CreateRoomPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const formData = {
+      name: e.target.name.value,
+      email: e.target.email.value,
+    };
+    
+    const res = await fetch('http://localhost:5000/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
+    
+    const result = await res.json();
+    console.log(result);
+    
     // Here you would typically send data to your backend
     console.log({
       roomType,
