@@ -46,39 +46,44 @@ const CreateRoomPage = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = {
-      name: e.target.name.value,
-      email: e.target.email.value,
-    };
-    
-    const res = await fetch('http://localhost:5000/submit', {
+  e.preventDefault();
+
+  const formData = {
+    name: e.target.name.value,
+    email: e.target.email.value,
+    roomtype: e.target.roomType.value,
+    artistname: e.target.artistName.value,
+    roomname: e.target.roomName.value,
+    description: e.target.description.value,
+    tags,              // ✅ from state
+    issyncenabled: e.target.isSyncEnabled.value === "true",
+    foodpartner: e.target.foodPartner.value,
+    privacy,           // ✅ from state
+    cohosts: coHosts,  // ✅ from state (array)
+    enabletips: e.target.enableTips.value === "true",
+    sponsorroom: e.target.sponsorRoom.value,
+    themecolor: e.target.themeColor.value
+  };
+
+  try {
+    const res = await fetch('https://stationhead-clone-production.up.railway.app/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
     });
-    
-    const result = await res.json();
-    console.log(result);
-    
-    // Here you would typically send data to your backend
-    console.log({
-      roomType,
-      artistName,
-      roomName,
-      description,
-      tags,
-      isSyncEnabled,
-      foodPartner,
-      privacy,
-      coHosts,
-      enableTips,
-      sponsorRoom,
-      themeColor
-    });
-    alert('Room created successfully!');
-  };
 
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status}`);
+    }
+
+    const result = await res.json();
+    console.log('✅ Backend response:', result);
+    alert('Room created successfully!');
+  } catch (error) {
+    console.error('❌ Submit failed:', error);
+    alert('There was a problem creating the room.');
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 py-8 px-4">
