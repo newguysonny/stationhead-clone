@@ -11,21 +11,26 @@ const { createSuperbaseClient } = require("@supabase/supabase-js");
 
 
 //Database connection
+// Initialize Supabase
 const supabase = createSuperbaseClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_KEY
-)
+);
 
+// Test DB connection
 async function testConnection() {
-  const { data, error } = await supabase.from('your_table_name').select('*').limit(1)
+  const { data, error } = await supabase
+    .from('your_table_name') // Replace this with your actual table name
+    .select('*')
+    .limit(1);
 
   if (error) {
-    console.error('❌ Supabase connection failed:', error.message)
+    console.error('❌ Supabase connection failed:', error.message);
   } else {
-    console.log('✅ Supabase connected. Sample data:', data)
+    console.log('✅ Supabase connected. Sample data:', data);
   }
 }
-testConnection()
+testConnection();
 // database connection ends here
 
 const app = express();
