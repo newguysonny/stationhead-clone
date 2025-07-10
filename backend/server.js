@@ -88,7 +88,7 @@ const roomSchema = z.object({
   sponsorroom: z.boolean().default(false),
   themecolor: z.string().regex(/^#[0-9A-F]{6}$/i).default('#000000')
 });
-/*
+/* //this is to test for the Front end validation if any error
 const roomSchema = z.object({
   // Basic info
   roomType: z.enum(['fan', 'verified']).default('fan'),
