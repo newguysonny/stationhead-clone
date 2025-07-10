@@ -8,7 +8,7 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { createAdapter } = require("@socket.io/redis-adapter");
 const { createClient: createSuperbaseClient } = require("@supabase/supabase-js");
-
+const { z } = require('zod'); // For validation
 
 
 
@@ -71,10 +71,76 @@ async function testConnection() {
 testConnection();
 // database connection ends here
 
+//api endpoint for sending room creation data
+
+// Define validation schema
+const roomSchema = z.object({
+  roomtype: z.string().min(1),
+  artistname: z.string().min(1),
+  roomname: z.string().min(1).max(50),
+  description: z.string().max(500).optional(),
+  tags: z.array(z.string().max(20)).max(10).optional(),
+  issyncenabled: z.boolean().default(false),
+  foodpartner: z.string().max(50).optional(),
+  privacy: z.enum(['public', 'private', 'unlisted']),
+  cohosts: z.array(z.string().uuid()).max(5).optional(),
+  enabletips: z.boolean().default(false),
+  sponsorroom: z.boolean().default(false),
+  themecolor: z.string().regex(/^#[0-9A-F]{6}$/i).default('#000000')
+});
+
+app.post('/submit', async (req, res) => {
+  try {
+    // 1. Validate input
+    const validatedData = roomSchema.parse(req.body);
+    
+    // 2. Sanitize data (example: trim strings)
+    const sanitizedData = {
+      ...validatedData,
+      artistName: validatedData.artistName.trim(),
+      roomName: validatedData.roomName.trim()
+    };
+
+    // 3. Insert with RLS (Row Level Security) considerations
+    const { data, error } = await supabase
+      .from('rooms')
+      .insert([sanitizedData])
+      .select(); // Returns the inserted record
+
+    if (error) throw error;
+
+    // 4. Success response
+    res.status(201).json({
+      success: true,
+      data: data[0],
+      message: 'Room created successfully'
+    });
+
+  } catch (error) {
+    // Handle different error types
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        errors: error.errors,
+        message: 'Validation failed'
+      });
+    }
+
+    console.error('Database error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Internal server error'
+    });
+  }
+});
+
+// api callback endpoint for Spotify room connection
 app.get("/callback", (req, res) => {
   const code = req.query.code;
   return res.redirect(`https://stationhead-clone.vercel.app/login?code=${code}`);
 });
+
+//api endpoint callback for Spotify login
 
 app.post("/auth/token", async (req, res) => {
   const code = req.body.code;
