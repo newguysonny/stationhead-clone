@@ -7,6 +7,16 @@ const { createClient } = require("redis");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { createAdapter } = require("@socket.io/redis-adapter");
+import { createClient } from '@supabase/supabase-js'
+
+
+//Database connection
+const supabaseUrl = process.env.SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_KEY
+export const supabase = createClient(supabaseUrl, supabaseKey)
+
+
+
 
 const app = express();
 const httpServer = createServer(app);
@@ -24,6 +34,7 @@ const io = new Server(httpServer, {
 
 app.use(cors());
 app.use(express.json());
+
 
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
