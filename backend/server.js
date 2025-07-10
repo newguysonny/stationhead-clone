@@ -88,6 +88,60 @@ const roomSchema = z.object({
   sponsorroom: z.boolean().default(false),
   themecolor: z.string().regex(/^#[0-9A-F]{6}$/i).default('#000000')
 });
+/*
+const roomSchema = z.object({
+  // Basic info
+  roomType: z.enum(['fan', 'verified']).default('fan'),
+  artistName: z.string()
+    .min(1, "Artist name is required")
+    .max(50, "Artist name too long")
+    .transform(str => str.trim()),
+  roomName: z.string()
+    .min(1, "Room name is required")
+    .max(50, "Room name too long")
+    .transform(str => str.trim()),
+  description: z.string()
+    .max(500, "Description too long")
+    .optional()
+    .transform(str => str?.trim() || ''),
+
+  // Tags (array of strings)
+  tags: z.array(
+    z.string()
+      .min(1, "Tag cannot be empty")
+      .max(20, "Tag too long")
+      .transform(str => str.trim().replace(/\s+/g, '-')) // Convert spaces to hyphens
+  ).max(10, "Maximum 10 tags allowed"),
+
+  // Settings
+  isSyncEnabled: z.boolean().default(true),
+  foodPartner: z.string()
+    .refine(val => val !== 'none' || val.length > 0, "Select a valid partner")
+    .default('none'),
+  privacy: z.enum(['public', 'private']).default('public'),
+
+  // User relationships
+  coHosts: z.array(
+    z.string().email("Invalid email format") // Or use username pattern: /^@[a-z0-9_]{3,20}$/i
+  ).max(5, "Maximum 5 co-hosts allowed"),
+
+  // Monetization
+  enableTips: z.boolean().default(false),
+  sponsorRoom: z.boolean().default(false),
+
+  // Customization
+  themeColor: z.enum(['blue', 'red', 'green', 'purple'])
+    .default('blue')
+    .transform(color => {
+      // Map to hex values if needed
+      const colors = { blue: '#3b82f6', red: '#ef4444', green: '#10b981', purple: '#8b5cf6' };
+      return colors[color as keyof typeof colors];
+    }),
+
+  // System fields (optional)
+  createdAt: z.date().default(() => new Date())
+}).strict(); // Prevents unknown properties
+*/
 
 app.post('/submit', async (req, res) => {
   try {
