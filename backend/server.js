@@ -7,16 +7,26 @@ const { createClient } = require("redis");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { createAdapter } = require("@socket.io/redis-adapter");
-import { createClient } from '@supabase/supabase-js'
+const { createClient } = require("@supabase/supabase-js");
 
 
 //Database connection
-const supabaseUrl = process.env.SUPABASE_URL
-const supabaseKey = process.env.SUPABASE_KEY
-export const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+)
 
+async function testConnection() {
+  const { data, error } = await supabase.from('your_table_name').select('*').limit(1)
 
-
+  if (error) {
+    console.error('❌ Supabase connection failed:', error.message)
+  } else {
+    console.log('✅ Supabase connected. Sample data:', data)
+  }
+}
+testConnection()
+// database connection ends here
 
 const app = express();
 const httpServer = createServer(app);
