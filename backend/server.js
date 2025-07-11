@@ -58,7 +58,7 @@ Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
 // Test DB connection
 async function testConnection() {
   const { data, error } = await supabase
-    .from('your_table_name') // Replace this with your actual table name
+    .from('rooms') // Replace this with your actual table name
     .select('*')
     .limit(1);
 
