@@ -73,7 +73,21 @@ testConnection();
 
 //api endpoint for sending room creation data
 
-// Define validation schema
+const roomSchema = z.object({
+  roomtype: z.string().min(1),
+  artistname: z.string().min(1),
+  roomname: z.string().min(1).max(50),
+  description: z.string().max(500).optional(),
+  tags: z.array(z.string().max(20)).max(10).optional(),
+  issyncenabled: z.boolean().default(false),
+  foodpartner: z.string().max(50).optional(),
+  privacy: z.enum(['public', 'private']).default('public'),
+  cohosts: z.array(z.string()).max(5).optional(), // removed .uuid() for now if cohosts are not UUIDs
+  enabletips: z.boolean().default(false),
+  sponsorroom: z.boolean().default(false),
+  themecolor: z.string().regex(/^#[0-9A-F]{6}$/i).default('#000000')
+});
+/* Define validation schema
 const roomSchema = z.object({
   roomtype: z.string().min(1),
   artistname: z.string().min(1),
@@ -87,7 +101,7 @@ const roomSchema = z.object({
   enabletips: z.boolean().default(false),
   sponsorroom: z.boolean().default(false),
   themecolor: z.string().regex(/^#[0-9A-F]{6}$/i).default('#000000')
-});
+}); */
 /* //this is to test for the Front end validation if any error
 const roomSchema = z.object({
   // Basic info
