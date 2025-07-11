@@ -157,6 +157,11 @@ const roomSchema = z.object({
 }).strict(); // Prevents unknown properties
 */
 
+app.get('/', (req, res) => {
+  res.send('🚀 Backend is live!');
+});
+
+
 app.post('/submit', async (req, res) => {
   try {
     // 1. Validate input
