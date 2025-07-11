@@ -48,7 +48,13 @@ const CreateRoomPage = () => {
   const handleSubmit = async (e) => {
   e.preventDefault();
 
-  const formData = {
+  const colorMap = {
+  blue: '#3b82f6',
+  red: '#ef4444',
+  green: '#10b981',
+};
+
+const formData = {
   roomtype: roomType,
   artistname: artistName,
   roomname: roomName,
@@ -60,8 +66,9 @@ const CreateRoomPage = () => {
   cohosts: coHosts,
   enabletips: enableTips,
   sponsorroom: sponsorRoom,
-  themecolor: themeColor
-  };
+  themecolor: colorMap[themeColor] || '#3b82f6', // default to blue hex
+};
+    console.log("Submitting formData:", formData);
 
   try {
     const res = await fetch('https://stationhead-clone-production.up.railway.app/submit', {
