@@ -49,20 +49,18 @@ const CreateRoomPage = () => {
   e.preventDefault();
 
   const formData = {
-    name: e.target.name.value,
-    email: e.target.email.value,
-    roomtype: e.target.roomType.value,
-    artistname: e.target.artistName.value,
-    roomname: e.target.roomName.value,
-    description: e.target.description.value,
-    tags,              // ✅ from state
-    issyncenabled: e.target.isSyncEnabled.value === "true",
-    foodpartner: e.target.foodPartner.value,
-    privacy,           // ✅ from state
-    cohosts: coHosts,  // ✅ from state (array)
-    enabletips: e.target.enableTips.value === "true",
-    sponsorroom: e.target.sponsorRoom.value,
-    themecolor: e.target.themeColor.value
+  roomtype: roomType,
+  artistname: artistName,
+  roomname: roomName,
+  description,
+  tags,
+  issyncenabled: isSyncEnabled,
+  foodpartner: foodPartner,
+  privacy,
+  cohosts: coHosts,
+  enabletips: enableTips,
+  sponsorroom: sponsorRoom,
+  themecolor: themeColor
   };
 
   try {
