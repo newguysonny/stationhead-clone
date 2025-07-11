@@ -82,7 +82,7 @@ const roomSchema = z.object({
   tags: z.array(z.string().max(20)).max(10).optional(),
   issyncenabled: z.boolean().default(false),
   foodpartner: z.string().max(50).optional(),
-  privacy: z.enum(['public', 'private', 'unlisted']),
+  privacy: z.enum(['public', 'private', 'unlisted']).default('public'),
   cohosts: z.array(z.string().uuid()).max(5).optional(),
   enabletips: z.boolean().default(false),
   sponsorroom: z.boolean().default(false),
@@ -151,8 +151,8 @@ app.post('/submit', async (req, res) => {
     // 2. Sanitize data (example: trim strings)
     const sanitizedData = {
       ...validatedData,
-      artistName: validatedData.artistName.trim(),
-      roomName: validatedData.roomName.trim()
+      artistname: validatedData.artistname.trim(),
+      roomname: validatedData.roomname.trim()
     };
 
     // 3. Insert with RLS (Row Level Security) considerations
