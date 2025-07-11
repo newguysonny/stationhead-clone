@@ -163,11 +163,20 @@ app.post('/submit', async (req, res) => {
     const validatedData = roomSchema.parse(req.body);
     
     // 2. Sanitize data (example: trim strings)
-    const sanitizedData = {
-      ...validatedData,
-      artistname: validatedData.artistname.trim(),
-      roomname: validatedData.roomname.trim()
-    };
+        const sanitizedData = {
+  room_type: validatedData.roomtype,
+  artist_name: validatedData.artistname.trim(),
+  room_name: validatedData.roomname.trim(),
+  description: validatedData.description,
+  tags: validatedData.tags,
+  is_sync_enabled: validatedData.issyncenabled,
+  food_partner: validatedData.foodpartner,
+  privacy: validatedData.privacy,
+  co_hosts: validatedData.cohosts,
+  enable_tips: validatedData.enabletips,
+  sponsor_room: validatedData.sponsorroom,
+  theme_color: validatedData.themecolor,
+};
 
     // 3. Insert with RLS (Row Level Security) considerations
     const { data, error } = await supabase
