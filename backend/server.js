@@ -267,7 +267,7 @@ io.on("connection", (socket) => {
 
   socket.on("join-room", (roomName) => {
     socket.join(roomName);
-    console.log(`Client ${socket.id} joined room ${room}`);
+    console.log(`Client ${socket.id} joined room ${roomName}`);
   });
 
   socket.on("sync-playback", (data) => {
