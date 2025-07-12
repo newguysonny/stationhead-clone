@@ -109,7 +109,7 @@ useEffect(() => {
       })
       .then(({ access_token }) => {
         localStorage.setItem("spotify_token", access_token);
-        navigate("/room/ :roomName"); // Update this to match your route
+        navigate("/room/:roomName"); // Update this to match your route
       })
       .catch((err) => {
         console.error("Failed to get token:", err);
