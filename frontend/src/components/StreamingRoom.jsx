@@ -162,8 +162,9 @@ export default function StreamingRoom({ room }) {
   const [playbackData, setPlaybackData] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("spotify_token") || "");
   const [sdkReady, setSdkReady] = useState(false);
-
+  const { roomName } = useParams(); // 👈 Get from URL (e.g., /room/lofi-beats)
   // Load Spotify Web Playback SDK script
+
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://sdk.scdn.co/spotify-player.js";
@@ -221,7 +222,7 @@ export default function StreamingRoom({ room }) {
 
   // Socket.IO connection and sync handling
   useEffect(() => {
-    if (!room?.name) return;
+    if (!roomName) return;
 
     socket = io(SOCKET_URL, {
       reconnectionAttempts: 5,
@@ -230,7 +231,7 @@ export default function StreamingRoom({ room }) {
 
     socket.on("connect", () => {
       console.log("Connected to socket.io:", socket.id);
-      socket.emit("join-room", room.name);
+      socket.emit("join-room", roomName);
     });
 
     socket.on("connect_error", (err) => {
@@ -248,7 +249,7 @@ export default function StreamingRoom({ room }) {
     return () => {
       socket.disconnect();
     };
-  }, [room?.name, player]);
+  }, [roomName, player]);
 
   if (!token) {
     return <Navigate to="/login" />;
@@ -256,7 +257,7 @@ export default function StreamingRoom({ room }) {
 
   const sendPlaybackSync = () => {
     const data = {
-      room: room?.name,
+      room: roomName,
       track: "spotify:track:7ouMYWpwJ422jRcDASZB7P",
       position: 0,
       isPlaying: true,
