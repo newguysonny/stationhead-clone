@@ -53,6 +53,8 @@ Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
   io.adapter(createAdapter(pubClient, subClient));
   console.log("Socket.IO Redis adapter initialized");
 });
+pubClient.on("error", (err) => console.error("Redis pubClient error:", err));
+subClient.on("error", (err) => console.error("Redis subClient error:", err));
 
 //Database connection
 // Test DB connection
@@ -263,8 +265,8 @@ app.post("/auth/token", async (req, res) => {
 io.on("connection", (socket) => {
   console.log("New client connected:", socket.id);
 
-  socket.on("join-room", (room) => {
-    socket.join(room);
+  socket.on("join-room", (roomName) => {
+    socket.join(roomName);
     console.log(`Client ${socket.id} joined room ${room}`);
   });
 
