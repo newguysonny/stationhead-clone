@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import CreateRoomPage from "./pages/CreateRoomPage";
+import RoomPage from "./pages/RoomPage";
 import StreamingRoom from "./components/StreamingRoom";
 /*import './styles/tailwind.output.css';*/
 import './App.css'; // The processed version
@@ -15,6 +16,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/startroom" element={<CreateRoomPage />} />
+        <Route path="/room" element={<RoomPage />} />
         <Route path="/room/:roomName" element={<StreamingRoomWrapper />} />
       </Routes>
     </BrowserRouter>
