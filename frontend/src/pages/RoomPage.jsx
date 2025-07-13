@@ -7,7 +7,7 @@ import SpotifyConnect from '../components/room/SpotifyConnect';
 
 export default function RoomPage() {
   const { roomId } = useParams();
-  const currentUserId = 'user123'; // Assume this comes from a global state/database
+  const currentUserId = 'dj456'; //'user123'; Assume this comes from a global state/database
   const room = {
     id: roomId,
     host_id: 'dj456', // Assume fetched from database
