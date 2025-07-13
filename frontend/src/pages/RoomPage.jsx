@@ -26,7 +26,7 @@ export default function RoomPage() {
       {!spotifyToken ? (
         <SpotifyConnect onConnect={setSpotifyToken} /> // Show Spotify button if not connected
       ) : (
-        isHost ? <DJView spotifyToken={spotifyToken} /> : <ListenerView />
+        isHost ? <DjView spotifyToken={spotifyToken} /> : <ListenerView />
       )}
     </div>
   );
