@@ -1,4 +1,5 @@
 // components/room/SpotifyConnect.jsx
+/*
 export default function SpotifyConnect({ onConnect }) {
   const handleConnect = () => {
     // Simulate Spotify connection (replace with real OAuth)
@@ -12,3 +13,4 @@ export default function SpotifyConnect({ onConnect }) {
     </button>
   );
 }
+*/
