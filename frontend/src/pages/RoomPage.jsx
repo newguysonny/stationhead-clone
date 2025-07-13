@@ -12,7 +12,7 @@ export default function RoomPage() {
     host_id: 'dj456', // Assume fetched from database
     is_live: true,
   };
-  console.log("Room data:", room); // Check browser console
+  console.log("Room data:", room); // Check browser consoles
   console.log("Current user ID:", currentUserId);
   
   const [spotifyToken, setSpotifyToken] = useState(null);
