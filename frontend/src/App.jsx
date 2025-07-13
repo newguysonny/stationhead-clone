@@ -16,7 +16,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/startroom" element={<CreateRoomPage />} />
-        <Route path="/room" element={<RoomPage />} />
+        <Route path="/rom" element={<RoomPage />} />
         <Route path="/room/:roomName" element={<StreamingRoomWrapper />} />
       </Routes>
     </BrowserRouter>
