@@ -1,6 +1,6 @@
 //pages/RoomPage.jsx
 import { useParams } from 'react-router-dom';
-import DJView from '../components/room/DJView';
+import DjView from '../components/room/DjView';
 import ListenerView from '../components/room/ListenerView';
 import SpotifyConnect from '../components/room/SpotifyConnect';
 
