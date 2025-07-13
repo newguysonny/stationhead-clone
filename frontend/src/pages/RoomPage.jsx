@@ -1,4 +1,4 @@
-// pages/RoomPage.jsx
+//pages/RoomPage.jsx
 import { useParams } from 'react-router-dom';
 import DJView from '../components/room/DJView';
 import ListenerView from '../components/room/ListenerView';
