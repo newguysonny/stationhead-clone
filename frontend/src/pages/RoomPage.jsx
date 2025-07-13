@@ -1,8 +1,8 @@
 // pages/RoomPage.jsx
 import { useParams } from 'react-router-dom';
-import DJView from '../components/Room/DJView';
-import ListenerView from '../components/Room/ListenerView';
-import SpotifyConnect from '../components/Room/SpotifyConnect';
+import DJView from '../components/room/DJView';
+import ListenerView from '../components/room/ListenerView';
+import SpotifyConnect from '../components/room/SpotifyConnect';
 
 export default function RoomPage() {
   const { roomId } = useParams();
