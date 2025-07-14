@@ -14,6 +14,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/callback" element={<RoomPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/startroom" element={<CreateRoomPage />} />
         <Route path="/rom" element={<RoomPage />} />
