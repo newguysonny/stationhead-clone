@@ -1,5 +1,7 @@
 //components/room/SpotifyConnect.jsx
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 
 export default function SpotifyConnect({ isHost, onAuthComplete, onAuthError }) {
   // Generate PKCE code verifier and challenge
