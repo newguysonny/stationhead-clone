@@ -1,6 +1,3 @@
-
-
-
 import { useState, useEffect, useRef } from 'react';
 import { FiHeart, FiShare2, FiShoppingCart, FiMessageSquare, FiMusic, FiUser } from 'react-icons/fi';
 
