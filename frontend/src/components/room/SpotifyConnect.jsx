@@ -77,6 +77,13 @@ export default function SpotifyConnect({ isHost, onAuthComplete }) {
             })
           });
 
+          if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Token exchange failed:', errorData);
+          onAuthError(errorData.error_description || 'Failed to get token');
+          return;
+          }
+
           const data = await response.json();
           onAuthComplete(data.access_token);
           
@@ -87,8 +94,9 @@ export default function SpotifyConnect({ isHost, onAuthComplete }) {
         }
       }
     };
-
-    handleCallback();
+    if (code) {
+         handleCallback();
+    }
   }, [onAuthComplete]);
 
   return (
