@@ -1,4 +1,106 @@
 // components/room/SpotifyConnect.jsx
+
+import { useEffect } from 'react';
+
+export default function SpotifyConnect({ isHost, onAuthComplete }) {
+  // Generate PKCE code verifier and challenge
+  const generateCodeVerifier = (length) => {
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    return Array.from(crypto.getRandomValues(new Uint8Array(length)))
+      .map((byte) => possible[byte % possible.length])
+      .join('');
+  };
+
+  const generateCodeChallenge = async (verifier) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(verifier);
+    const digest = await window.crypto.subtle.digest('SHA-256', data);
+    return btoa(String.fromCharCode(...new Uint8Array(digest)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  };
+
+  const handleConnect = async () => {
+    const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
+    const redirectUri = window.location.origin + '/callback';
+    const verifier = generateCodeVerifier(64);
+    const challenge = await generateCodeChallenge(verifier);
+
+    localStorage.setItem('spotify_verifier', verifier);
+
+    const params = new URLSearchParams();
+    params.append('client_id', clientId);
+    params.append('response_type', 'code');
+    params.append('redirect_uri', redirectUri);
+    params.append('scope', [
+      'streaming',
+      'user-read-email',
+      ...(isHost ? ['user-modify-playback-state'] : [])
+    ].join(' '));
+    params.append('code_challenge_method', 'S256');
+    params.append('code_challenge', challenge);
+
+    window.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
+  };
+
+  // Handle callback when component mounts
+  useEffect(() => {
+    const handleCallback = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const error = params.get('error');
+
+      if (error) {
+        console.error('Spotify auth error:', error);
+        return;
+      }
+
+      if (code) {
+        try {
+          const verifier = localStorage.getItem('spotify_verifier');
+          const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
+          const redirectUri = window.location.origin + '/callback';
+
+          const response = await fetch('https://accounts.spotify.com/api/token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+              client_id: clientId,
+              grant_type: 'authorization_code',
+              code,
+              redirect_uri: redirectUri,
+              code_verifier: verifier
+            })
+          });
+
+          const data = await response.json();
+          onAuthComplete(data.access_token);
+          
+          // Clean URL
+          window.history.replaceState({}, '', window.location.pathname);
+        } catch (err) {
+          console.error('Token exchange failed:', err);
+        }
+      }
+    };
+
+    handleCallback();
+  }, [onAuthComplete]);
+
+  return (
+    <button
+      onClick={handleConnect}
+      className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-medium"
+    >
+      Connect Spotify
+    </button>
+  );
+}
+
+
 /*
 export default function SpotifyConnect({ onConnect }) {
   const handleConnect = () => {
@@ -14,6 +116,7 @@ export default function SpotifyConnect({ onConnect }) {
   );
 }
 */
+/*
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -76,3 +179,4 @@ export default function SpotifyConnect({ isHost, onAuthComplete }) {
     </div>
   );
 }
+*/
