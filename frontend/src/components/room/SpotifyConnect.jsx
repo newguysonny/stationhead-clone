@@ -37,7 +37,7 @@ export default function SpotifyConnect({ isHost, onAuthComplete, onAuthError }) 
     params.append('scope', [
       'streaming',
       'user-read-email',
-      ...(isHost ? ['user-modify-playback-state'] : [])
+      ...(isHost ? ['user-modify-playback-state','user-read-playback-state','user-read-currently-playing] : [])
     ].join(' '));
     params.append('code_challenge_method', 'S256');
     params.append('code_challenge', challenge);
