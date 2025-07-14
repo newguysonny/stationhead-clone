@@ -62,6 +62,17 @@ export default function RoomPage() {
   };
 
   return (
+    <div className="min-h-screen bg-gray-100">
+      {!spotifyToken ? (
+        <div className="p-4">
+          {/* Show header only during auth phase */}
+          <div className="bg-white rounded-lg shadow p-4 mb-4">
+            <h1 className="text-xl font-bold">Room: {roomId}</h1>
+            <p className="text-gray-600">
+              {isHost ? 'You are the host' : 'You are a listener'}
+            </p>
+          </div>
+    /*
     <div className="min-h-screen bg-gray-100 p-4">
       {/* Room Header */}
       <div className="bg-white rounded-lg shadow p-4 mb-4">
@@ -69,7 +80,7 @@ export default function RoomPage() {
         <p className="text-gray-600">
           {isHost ? 'You are the host' : 'You are a listener'}
         </p>
-      </div>
+      </div> */
 
       {/* Auth Status */}
       {authError && (
