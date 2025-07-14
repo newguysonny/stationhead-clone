@@ -49,7 +49,7 @@ export default function RoomPage() {
     host_id: 'dj456',  // From database
     is_live: true 
   });
-  const currentUserId = 'dj456'; // From auth context
+  const currentUserId = 'dj446'; // From auth context
   
   const [spotifyToken, setSpotifyToken] = useState(null);
   const [authError, setAuthError] = useState(null);
@@ -72,23 +72,22 @@ export default function RoomPage() {
               {isHost ? 'You are the host' : 'You are a listener'}
             </p>
           </div>
-    
 
-      {/* Auth Status */}
-      {authError && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
-          {authError}
-        </div>
-      )}
+          {/* Auth Status */}
+          {authError && (
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
+              {authError}
+            </div>
+          )}
 
-      {/* Main Content */}
-      {!spotifyToken ? (
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <SpotifyConnect 
-            isHost={isHost} 
-            onAuthComplete={setSpotifyToken} 
-            onAuthError={handleAuthError} 
-          />
+          {/* Spotify Connect Button */}
+          <div className="bg-white rounded-lg shadow p-6 text-center">
+            <SpotifyConnect 
+              isHost={isHost} 
+              onAuthComplete={setSpotifyToken} 
+              onAuthError={handleAuthError} 
+            />
+          </div>
         </div>
       ) : isHost ? (
         <DjView spotifyToken={spotifyToken} />
