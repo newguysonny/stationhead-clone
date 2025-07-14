@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function SpotifyConnect({ isHost, onAuthComplete }) {
+export default function SpotifyConnect({ isHost, onAuthComplete, onAuthError }) => {
   // Generate PKCE code verifier and challenge
   const generateCodeVerifier = (length) => {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -54,12 +54,17 @@ export default function SpotifyConnect({ isHost, onAuthComplete }) {
 
       if (error) {
         console.error('Spotify auth error:', error);
+        if (onAuthError) onAuthError(error);
         return;
       }
 
       if (code) {
         try {
           const verifier = localStorage.getItem('spotify_verifier');
+          if (!verifier) {
+            throw new Error('Missing code verifier');
+          }
+
           const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
           const redirectUri = window.location.origin + '/callback';
 
@@ -78,26 +83,25 @@ export default function SpotifyConnect({ isHost, onAuthComplete }) {
           });
 
           if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Token exchange failed:', errorData);
-          onAuthError(errorData.error_description || 'Failed to get token');
-          return;
+            const errorData = await response.json();
+            throw new Error(errorData.error_description || 'Token exchange failed');
           }
 
           const data = await response.json();
+          localStorage.removeItem('spotify_verifier'); // Clean up
           onAuthComplete(data.access_token);
           
           // Clean URL
           window.history.replaceState({}, '', window.location.pathname);
         } catch (err) {
           console.error('Token exchange failed:', err);
+          if (onAuthError) onAuthError(err.message);
         }
       }
     };
-    if (code) {
-         handleCallback();
-    }
-  }, [onAuthComplete]);
+
+    handleCallback();
+  }, [onAuthComplete, onAuthError]);
 
   return (
     <button
@@ -107,7 +111,7 @@ export default function SpotifyConnect({ isHost, onAuthComplete }) {
       Connect Spotify
     </button>
   );
-}
+};
 
 
 /*
