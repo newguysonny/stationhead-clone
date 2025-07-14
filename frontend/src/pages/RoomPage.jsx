@@ -34,7 +34,7 @@ export default function RoomPage() {
 }
 */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import DjView from '../components/room/DjView';
 import ListenerView from '../components/room/ListenerView';
@@ -57,26 +57,9 @@ export default function RoomPage() {
   // Check if current user is the host
   const isHost = currentUserId === room.host_id;
 
-  // Handle Spotify auth callback from URL hash
-  useEffect(() => {
-    const hash = window.location.hash.substring(1);
-    if (!hash) return;
-
-    const params = new URLSearchParams(hash);
-    const token = params.get('access_token');
-    const error = params.get('error');
-
-    if (error) {
-      setAuthError(`Spotify connection failed: ${error}`);
-      return;
-    }
-
-    if (token) {
-      setSpotifyToken(token);
-      // Clean URL after getting token
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, []);
+  const handleAuthError = (error) => {
+    setAuthError(`Spotify connection failed: ${error}`);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
@@ -100,7 +83,8 @@ export default function RoomPage() {
         <div className="bg-white rounded-lg shadow p-6 text-center">
           <SpotifyConnect 
             isHost={isHost} 
-            onConnectSuccess={setSpotifyToken} 
+            onAuthComplete={setSpotifyToken} 
+            onAuthError={handleAuthError} 
           />
         </div>
       ) : isHost ? (
