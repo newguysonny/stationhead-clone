@@ -1,4 +1,4 @@
-// components/room/SpotifyConnect.jsx
+//components/room/SpotifyConnect.jsx
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
