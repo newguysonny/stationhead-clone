@@ -49,7 +49,7 @@ export default function RoomPage() {
     host_id: 'dj456',  // From database
     is_live: true 
   });
-  const currentUserId = 'dj446'; // From auth context
+  const currentUserId = 'dj456'; // From auth context
   
   const [spotifyToken, setSpotifyToken] = useState(null);
   const [authError, setAuthError] = useState(null);
