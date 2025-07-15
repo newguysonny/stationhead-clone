@@ -185,7 +185,7 @@ const DjView = () => {
           </div>
         </div>
 
-        {/* Chat Column */}
+        {/* Chat Column - Updated with action buttons */}
         <div className="lg:w-1/3 bg-gray-800/50 border-t lg:border-t-0 lg:border-l border-gray-700 flex flex-col">
           <div className="p-4">
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
@@ -206,6 +206,7 @@ const DjView = () => {
             <div ref={chatEndRef} />
           </div>
           
+          {/* Message Input */}
           <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700">
             <div className="flex gap-2">
               <input
@@ -223,8 +224,28 @@ const DjView = () => {
               </button>
             </div>
           </form>
+
+          {/* Action Buttons Row - NEW SECTION */}
+          <div className="flex justify-around p-3 border-t border-gray-700 bg-gray-800/70">
+            <button className="p-2 rounded-full hover:bg-gray-700 text-gray-300 hover:text-purple-400">
+              <FiMessageSquare size={20} />
+            </button>
+            <button className="p-2 rounded-full hover:bg-gray-700 text-gray-300 hover:text-blue-400">
+              <FiShoppingCart size={20} />
+            </button>
+            <button 
+              onClick={handleLike}
+              className="p-2 rounded-full hover:bg-gray-700 text-pink-500 hover:text-pink-400"
+            >
+              <FiHeart size={20} />
+            </button>
+            <button className="p-2 rounded-full hover:bg-gray-700 text-gray-300 hover:text-green-400">
+              <FiShare2 size={20} />
+            </button>
+          </div>
         </div>
       </div>
+
 
       {/* Playlist Modal */}
       {showPlaylistModal && (
