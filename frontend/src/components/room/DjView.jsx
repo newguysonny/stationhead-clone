@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
   FiPlus, FiX, FiSearch, FiPlay, FiPause, FiSkipForward, FiMusic, 
-  FiHeart, FiShare2, FiShoppingCart, FiMessageSquare, FiUser, FiMenu 
+  FiHeart, FiShare2, FiMessageSquare, FiMenu, FiChevronLeft 
 } from 'react-icons/fi';
 
 const DjView = () => {
-  // Playlist states
+  // Playlist state
   const [playlist, setPlaylist] = useState([
     {
       id: '1',
@@ -24,12 +24,14 @@ const DjView = () => {
       isPlaying: false
     }
   ]);
-  
+
+  // Search state
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchModal, setShowSearchModal] = useState(false);
-  
-  // Listener view states
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+
+  // Room state
   const [isConnected, setIsConnected] = useState(false);
   const [likes, setLikes] = useState(1200);
   const [listeners, setListeners] = useState(24);
@@ -40,25 +42,20 @@ const DjView = () => {
     { id: 2, user: 'FoodieDJ', text: 'Try the new spicy mayo dip!', icon: '🦄' },
     { id: 3, user: 'KpopStan99', text: 'OMG this remix 🔥', icon: '👒' }
   ]);
-  
-  // Mobile menu state
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
+
   const chatEndRef = useRef(null);
 
-  const currentSong = {
-    title: playlist.find(t => t.isPlaying)?.name || 'No track playing',
-    artist: playlist.find(t => t.isPlaying)?.artist || 'Select a track',
-    fanbase: 'ARMY'
-  };
+  // Current playing song
+  const currentSong = playlist.find(track => track.isPlaying) || playlist[0];
 
   // Auto-scroll chat to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Mock search results
-  const mockSearch = () => {
-    return [
+  // Mock search function
+  const handleSearch = () => {
+    setSearchResults([
       {
         id: '3',
         name: 'Dynamite',
@@ -73,15 +70,13 @@ const DjView = () => {
         duration: '3:49',
         albumArt: 'https://i.scdn.co/image/ab67616d00001e02f8a6d6a5b5d5c5e5d5e5d5e5'
       }
-    ];
+    ]);
   };
 
-  const handleSearch = () => {
-    setSearchResults(mockSearch());
-  };
-
+  // Playlist actions
   const addToPlaylist = (track) => {
-    setPlaylist([...playlist, {...track, isPlaying: false}]);
+    setPlaylist([...playlist, { ...track, isPlaying: false }]);
+    setShowSearchModal(false);
   };
 
   const removeFromPlaylist = (index) => {
@@ -97,6 +92,7 @@ const DjView = () => {
     })));
   };
 
+  // Chat actions
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (message.trim()) {
@@ -123,23 +119,138 @@ const DjView = () => {
           Vinyl & Veggie Night
         </h1>
         <button 
-          onClick={() => setShowMobileMenu(!showMobileMenu)}
+          onClick={() => setShowPlaylistModal(true)}
           className="p-2 rounded-full hover:bg-purple-700"
         >
           <FiMenu size={20} />
         </button>
       </div>
 
-      {/* Main Container */}
-      <div className="flex flex-col lg:flex-row h-screen">
-        {/* Playlist Column - Hidden on mobile unless menu is open */}
-        <div className={`${showMobileMenu ? 'block' : 'hidden'} lg:block lg:w-1/3 bg-gray-800 overflow-y-auto`}>
+      {/* Main Content */}
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] lg:h-screen">
+        {/* Main Content Column */}
+        <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold flex items-center justify-center gap-2">
+              <FiMusic className="text-purple-400" /> 
+              Vinyl & Veggie Night
+            </h1>
+            <p className="text-purple-300">By BTS</p>
+          </div>
+
+          <div className="bg-purple-900/30 border border-purple-500 rounded-lg p-3 text-center mb-6 animate-pulse">
+            <p className="font-medium">Syncing as ARMY</p>
+          </div>
+
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center text-2xl mb-2">
+              🦄
+            </div>
+            <p className="flex items-center gap-2">
+              @FoodieDJ 
+              <button onClick={handleLike} className="flex items-center text-pink-500">
+                <FiHeart className="mr-1" /> {likes.toLocaleString()}
+              </button>
+            </p>
+          </div>
+
+          <div className="bg-gray-800/50 rounded-xl p-4 mb-6">
+            <h2 className="text-lg font-semibold mb-3 text-center">Now Playing</h2>
+            <div className="flex items-center justify-center gap-4">
+              <div className="text-4xl">🎧</div>
+              <div>
+                <h3 className="font-bold text-xl">{currentSong?.name || 'No track playing'}</h3>
+                <p className="text-purple-300">{currentSong?.artist || 'Select a track'}</p>
+              </div>
+            </div>
+          </div>
+
+          <button 
+            onClick={() => setIsConnected(!isConnected)}
+            className={`w-full py-3 rounded-full mb-6 flex items-center justify-center gap-2 font-medium ${
+              isConnected ? 'bg-green-600' : 'bg-purple-600 hover:bg-purple-700'
+            }`}
+          >
+            <FiMusic />
+            {isConnected ? 'Connected to Spotify' : 'Connect Spotify'}
+          </button>
+
+          <div className="flex justify-center gap-6 mb-8 text-gray-300">
+            <span className="flex items-center gap-1">
+              ▶️ {plays.toLocaleString()}
+            </span>
+            <span className="flex items-center gap-1">
+              👥 {listeners.toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        {/* Chat Column */}
+        <div className="lg:w-1/3 bg-gray-800/50 border-t lg:border-t-0 lg:border-l border-gray-700 flex flex-col">
           <div className="p-4">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <FiMusic /> Playlist
-            </h2>
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <FiMessageSquare /> Chat
+            </h3>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto px-4 pb-4">
+            {messages.map((msg) => (
+              <div key={msg.id} className="mb-4 last:mb-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{msg.icon}</span>
+                  <span className="font-bold">@{msg.user}</span>
+                </div>
+                <p className="ml-10 mt-1">{msg.text}</p>
+              </div>
+            ))}
+            <div ref={chatEndRef} />
+          </div>
+          
+          <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Send a message..."
+                className="flex-1 bg-gray-700 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+              <button 
+                type="submit"
+                className="bg-purple-600 hover:bg-purple-700 w-10 h-10 rounded-full flex items-center justify-center"
+              >
+                →
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* Playlist Modal */}
+      {showPlaylistModal && (
+        <div className="fixed inset-0 bg-gray-900 z-50 overflow-y-auto">
+          <div className="bg-gradient-to-r from-purple-600 to-blue-500 p-4 flex justify-between items-center">
+            <button 
+              onClick={() => setShowPlaylistModal(false)}
+              className="p-2 rounded-full hover:bg-purple-700"
+            >
+              <FiChevronLeft size={24} />
+            </button>
+            <h1 className="text-xl font-bold flex items-center gap-2">
+              <FiMusic className="text-white" /> 
+              Playlist
+            </h1>
+            <div className="w-10"></div>
+          </div>
+
+          <div className="p-4">
+            <button
+              onClick={() => setShowSearchModal(true)}
+              className="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-lg flex items-center justify-center gap-2 font-medium mb-6"
+            >
+              <FiPlus /> Add Music
+            </button>
             
-            {/* Playlist Items */}
             <div className="space-y-3 mb-6">
               {playlist.map((track, index) => (
                 <div 
@@ -172,166 +283,56 @@ const DjView = () => {
                 </div>
               ))}
             </div>
-            
-            {/* Add Music Button */}
-            <button
-              onClick={() => setShowSearchModal(true)}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-lg flex items-center justify-center gap-2 font-medium"
-            >
-              <FiPlus /> Add Music
-            </button>
-          </div>
-        </div>
-
-        {/* Main Content Column */}
-        <div className="flex-1 overflow-y-auto p-4 lg:p-6">
-          {/* Room Header */}
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold flex items-center justify-center gap-2">
-              <FiMusic className="text-purple-400" /> 
-              Vinyl & Veggie Night
-            </h1>
-            <p className="text-purple-300">By BTS</p>
           </div>
 
-          {/* Sync Status */}
-          <div className="bg-purple-900/30 border border-purple-500 rounded-lg p-3 text-center mb-6 animate-pulse">
-            <p className="font-medium">Syncing as {currentSong.fanbase}</p>
-          </div>
-
-          {/* Host Info */}
-          <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center text-2xl mb-2">
-              🦄
-            </div>
-            <p className="flex items-center gap-2">
-              @FoodieDJ 
-              <button onClick={handleLike} className="flex items-center text-pink-500">
-                <FiHeart className="mr-1" /> {likes.toLocaleString()}
-              </button>
-            </p>
-          </div>
-
-          {/* Now Playing */}
-          <div className="bg-gray-800/50 rounded-xl p-4 mb-6">
-            <h2 className="text-lg font-semibold mb-3 text-center">Now Playing</h2>
-            <div className="flex items-center justify-center gap-4">
-              <div className="text-4xl">🎧</div>
-              <div>
-                <h3 className="font-bold text-xl">{currentSong.title}</h3>
-                <p className="text-purple-300">{currentSong.artist}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Connect Button */}
-          <button 
-            onClick={() => setIsConnected(true)}
-            className={`w-full py-3 rounded-full mb-6 flex items-center justify-center gap-2 font-medium ${
-              isConnected ? 'bg-green-600' : 'bg-purple-600 hover:bg-purple-700'
-            }`}
-          >
-            <FiMusic />
-            {isConnected ? 'Connected to Spotify' : 'Connect Spotify'}
-          </button>
-
-          {/* Stats */}
-          <div className="flex justify-center gap-6 mb-8 text-gray-300">
-            <span className="flex items-center gap-1">
-              ▶️ {plays.toLocaleString()}
-            </span>
-            <span className="flex items-center gap-1">
-              👥 {listeners.toLocaleString()}
-            </span>
-          </div>
-        </div>
-
-        {/* Chat Column */}
-        <div className="lg:w-1/3 bg-gray-800/50 border-t lg:border-t-0 lg:border-l border-gray-700 flex flex-col">
-          <div className="p-4">
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <FiMessageSquare /> Chat
-            </h3>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto px-4">
-            {messages.map((msg) => (
-              <div key={msg.id} className="mb-4 last:mb-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{msg.icon}</span>
-                  <span className="font-bold">@{msg.user}</span>
+          {/* Player Controls in Modal */}
+          <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 p-3">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <img 
+                  src={currentSong?.albumArt || ''} 
+                  alt="Now Playing" 
+                  className="w-10 h-10 rounded-md"
+                />
+                <div>
+                  <p className="font-medium text-sm">
+                    {currentSong?.name || 'No track playing'}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {currentSong?.artist || 'Select a track'}
+                  </p>
                 </div>
-                <p className="ml-10 mt-1">{msg.text}</p>
               </div>
-            ))}
-            <div ref={chatEndRef} />
-          </div>
-          
-          {/* Message Input */}
-          <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Send a message..."
-                className="flex-1 bg-gray-700 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-              <button 
-                type="submit"
-                className="bg-purple-600 hover:bg-purple-700 w-10 h-10 rounded-full flex items-center justify-center"
-              >
-                →
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      {/* Player Controls (Fixed at bottom) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 p-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img 
-              src={playlist.find(t => t.isPlaying)?.albumArt || ''} 
-              alt="Now Playing" 
-              className="w-10 h-10 rounded-md"
-            />
-            <div>
-              <p className="font-medium text-sm">
-                {playlist.find(t => t.isPlaying)?.name || 'No track playing'}
-              </p>
-              <p className="text-xs text-gray-400">
-                {playlist.find(t => t.isPlaying)?.artist || 'Select a track'}
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <button className="p-2 rounded-full hover:bg-gray-700">
-              <FiSkipForward className="transform rotate-180" />
-            </button>
-            <button className="p-3 bg-purple-600 hover:bg-purple-700 rounded-full">
-              {playlist.some(t => t.isPlaying) ? <FiPause /> : <FiPlay />}
-            </button>
-            <button className="p-2 rounded-full hover:bg-gray-700">
-              <FiSkipForward />
-            </button>
-          </div>
-          
-          <div className="w-1/4 hidden md:block">
-            <div className="h-1 bg-gray-700 rounded-full overflow-hidden">
-              <div className="h-full bg-purple-500 w-1/3"></div>
+              
+              <div className="flex items-center gap-4">
+                <button className="p-2 rounded-full hover:bg-gray-700">
+                  <FiSkipForward className="transform rotate-180" />
+                </button>
+                <button 
+                  onClick={() => togglePlay(currentSong?.id)}
+                  className="p-3 bg-purple-600 hover:bg-purple-700 rounded-full"
+                >
+                  {currentSong?.isPlaying ? <FiPause /> : <FiPlay />}
+                </button>
+                <button className="p-2 rounded-full hover:bg-gray-700">
+                  <FiSkipForward />
+                </button>
+              </div>
+              
+              <div className="w-1/4 hidden md:block">
+                <div className="h-1 bg-gray-700 rounded-full overflow-hidden">
+                  <div className="h-full bg-purple-500 w-1/3"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Search Modal */}
       {showSearchModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-800 rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
-            {/* Modal Header */}
             <div className="flex justify-between items-center p-4 border-b border-gray-700">
               <h3 className="text-xl font-semibold flex items-center gap-2">
                 <FiMusic /> Add Music from Spotify
@@ -344,7 +345,6 @@ const DjView = () => {
               </button>
             </div>
             
-            {/* Search Bar */}
             <div className="p-4 border-b border-gray-700">
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -367,7 +367,6 @@ const DjView = () => {
               </div>
             </div>
             
-            {/* Search Results */}
             <div className="flex-1 overflow-y-auto">
               {searchResults.length > 0 ? (
                 <div className="divide-y divide-gray-700">
@@ -383,10 +382,7 @@ const DjView = () => {
                         <p className="text-sm text-gray-400 truncate">{track.artist} • {track.duration}</p>
                       </div>
                       <button 
-                        onClick={() => {
-                          addToPlaylist(track);
-                          setShowSearchModal(false);
-                        }}
+                        onClick={() => addToPlaylist(track)}
                         className="ml-4 p-2 bg-green-600 hover:bg-green-700 rounded-full"
                       >
                         <FiPlus size={20} />
