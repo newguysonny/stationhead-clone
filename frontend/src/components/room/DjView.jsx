@@ -4,7 +4,7 @@ import {
   FiHeart, FiShare2, FiMessageSquare, FiMenu, FiChevronLeft, FiShoppingCart 
 } from 'react-icons/fi';
 
-const DjView = () => {
+const DjView = ({ spotifyToken }) => {
   // Playlist state
   const [playlist, setPlaylist] = useState([
     {
@@ -166,13 +166,13 @@ const DjView = () => {
           </div>
 
           <button 
-            onClick={() => setIsConnected(!isConnected)}
+            onClick={() => setIsConnected(!spotifyToken)}
             className={`w-full py-3 rounded-full mb-6 flex items-center justify-center gap-2 font-medium ${
               isConnected ? 'bg-green-600' : 'bg-purple-600 hover:bg-purple-700'
             }`}
           >
             <FiMusic />
-            {isConnected ? 'Connected to Spotify' : 'Connect Spotify'}
+            {spotifyToken ? 'Connected to Spotify' : 'Connect Spotify to play music'}
           </button>
 
           <div className="flex justify-center gap-6 mb-8 text-gray-300">
