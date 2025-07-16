@@ -74,7 +74,7 @@ const DjView = ({ spotifyToken }) => {
     setPlaylist([...playlist, { ...track, isPlaying: false }]);
     setNotification(`${track.name} added to queue`);
     setTimeout(() => setNotification(null), 3000);
-    setOpenModal('dj-control'); // Return to DJ Control modal after adding
+    // Removed modal close to keep search open
   };
 
   const removeFromPlaylist = (index) => setPlaylist(playlist.filter((_, i) => i !== index));
@@ -92,9 +92,9 @@ const DjView = ({ spotifyToken }) => {
     }
   };
 
-  // Player Controls Component
-  const PlayerControls = ({ compact = false }) => (
-    <div className={`bg-gray-800 border-t border-gray-700 p-3 ${compact ? 'lg:hidden' : ''}`}>
+  // Player Controls Component (Only used in modals)
+  const PlayerControls = () => (
+    <div className="sticky bottom-0 bg-gray-800 border-t border-gray-700 p-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img 
@@ -206,9 +206,6 @@ const DjView = ({ spotifyToken }) => {
               ))}
             </div>
           </div>
-          
-          {/* Desktop Player Controls */}
-          <PlayerControls />
         </div>
 
         {/* Main Content Column (30%) */}
@@ -321,9 +318,6 @@ const DjView = ({ spotifyToken }) => {
           </div>
         </div>
       </div>
-
-      {/* Mobile Player Controls (Fixed at bottom when no modals open) */}
-      <PlayerControls compact />
 
       {/* DJ Control Modal (Mobile Only) */}
       {openModal === 'dj-control' && (
@@ -473,6 +467,9 @@ const DjView = ({ spotifyToken }) => {
                 ))}
               </div>
             </div>
+
+            {/* Player Controls */}
+            <PlayerControls />
           </div>
         </div>
       )}
