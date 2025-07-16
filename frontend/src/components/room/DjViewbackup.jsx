@@ -26,8 +26,7 @@ const DjView = ({ spotifyToken }) => {
   ]);
 
   // Inside your component
-const [searchQuery, setSearchQuery] = useState('');
-const [searchResults, setSearchResults] = useState([]);
+
 const [searchOffset, setSearchOffset] = useState(0); // For pagination
 const searchCache = useRef({}); // Simple cache
   const [openModal, setOpenModal] = useState(null); // 'dj-control' | 'search' | null
@@ -171,7 +170,10 @@ const loadMoreResults = () => {
 };
 
   // adding track to playlist after search
-  
+  const addToPlaylist = (track) => {
+         setPlaylist([...playlist, { ...track, isPlaying: false }]);
+       };
+
    const handleAddToPlaylist = async (item) => {
   if (item.type === 'track') {
     // Directly add single track
@@ -208,7 +210,7 @@ const loadMoreResults = () => {
   }
 };
 
-  // remove playlist track
+  // toggle track
    const togglePlay = (id) => {
   const targetTrack = playlist.find(track => track.id === id);
   if (!targetTrack) return; // Guard clause
@@ -220,7 +222,20 @@ const loadMoreResults = () => {
       : false                  // Pause others
   })));
 };
-
+    // remove playlist track
+   const removeFromPlaylist = (index) => {
+     const wasPlaying = playlist[index].isPlaying;
+     const newPlaylist = playlist.filter((_, i) => i !== index);
+     
+     setPlaylist(wasPlaying && newPlaylist.length > 0 
+       ? newPlaylist.map((track, i) => ({
+           ...track,
+           isPlaying: i === 0 // Play first track if removed track was playing
+         }))
+       : newPlaylist
+     );
+   };
+    
   // Chat actions
   const handleSendMessage = (e) => {
     e.preventDefault();
