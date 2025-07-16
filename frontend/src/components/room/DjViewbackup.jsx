@@ -330,7 +330,7 @@ const loadMoreResults = () => {
                     <p className="text-sm text-gray-400 truncate">{track.artist} • {track.duration}</p>
                   </div>
                   <button 
-                    onClick={() => addToPlaylist(track)}
+                    onClick={() => handleAddToPlaylist(track)}
                     className="ml-2 p-2 bg-green-600 hover:bg-green-700 rounded-full"
                   >
                     <FiPlus size={18} />
@@ -593,7 +593,7 @@ const loadMoreResults = () => {
                       <p className="text-sm text-gray-400 truncate">{track.artist} • {track.duration}</p>
                     </div>
                     <button 
-                      onClick={() => addToPlaylist(track)}
+                      onClick={() => handleAddToPlaylist(track)}
                       className="ml-2 p-2 bg-green-600 hover:bg-green-700 rounded-full"
                     >
                       <FiPlus size={18} />
