@@ -3,7 +3,8 @@ import {
   FiPlus, FiX, FiSearch, FiPlay, FiPause, FiSkipForward, FiMusic, 
   FiHeart, FiShare2, FiMessageSquare, FiMenu, FiShoppingCart, FiUser
 } from 'react-icons/fi';
-import { debounce } from './utils/debounce';
+import { debounce } from '../../utils/debounce';
+import { msToMinutes } from '../../utils/time';
 
 const DjView = ({ spotifyToken }) => {
   // State
