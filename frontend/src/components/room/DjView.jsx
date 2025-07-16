@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   FiPlus, FiX, FiSearch, FiPlay, FiPause, FiSkipForward, FiMusic, 
   FiHeart, FiShare2, FiMessageSquare, FiMenu, FiShoppingCart, FiUser
@@ -35,6 +35,7 @@ const DjView = ({ spotifyToken }) => {
   const [listeners, setListeners] = useState(24);
   const [plays, setPlays] = useState(5800);
   const [message, setMessage] = useState('');
+  const [notification, setNotification] = useState(null);
   const [messages, setMessages] = useState([
     { id: 1, user: 'MusicLover42', text: 'These tacos go hard with this beat!', icon: '👤' },
     { id: 2, user: 'FoodieDJ', text: 'Try the new spicy mayo dip!', icon: '🦄' },
@@ -42,7 +43,7 @@ const DjView = ({ spotifyToken }) => {
   ]);
 
   const chatEndRef = useRef(null);
-  const currentSong = playlist.find(track => track.isPlaying) || playlist[0];
+  const currentSong = useMemo(() => playlist.find(track => track.isPlaying) || playlist[0], [playlist]);
 
   // Auto-scroll chat
   useEffect(() => {
@@ -70,7 +71,12 @@ const DjView = ({ spotifyToken }) => {
   };
 
   // Playlist actions
-  const addToPlaylist = (track) => setPlaylist([...playlist, { ...track, isPlaying: false }]);
+  const addToPlaylist = (track) => {
+    setPlaylist([...playlist, { ...track, isPlaying: false }]);
+    setNotification(`${track.name} added to queue`);
+    setTimeout(() => setNotification(null), 3000);
+  };
+
   const removeFromPlaylist = (index) => setPlaylist(playlist.filter((_, i) => i !== index));
   const togglePlay = (id) => setPlaylist(playlist.map(track => ({
     ...track,
@@ -96,6 +102,7 @@ const DjView = ({ spotifyToken }) => {
         <button 
           onClick={() => setShowMobileMenu(!showMobileMenu)}
           className="p-2 rounded-full hover:bg-purple-700 transition-all"
+          aria-label="Toggle menu"
         >
           {showMobileMenu ? <FiX size={20} /> : <FiMenu size={20} />}
         </button>
@@ -138,10 +145,18 @@ const DjView = ({ spotifyToken }) => {
                         <p className="text-sm text-gray-400 truncate">{track.artist} • {track.duration}</p>
                       </div>
                       <div className="flex gap-3 ml-4">
-                        <button onClick={() => togglePlay(track.id)} className="p-2 hover:bg-gray-600 rounded-full">
+                        <button 
+                          onClick={() => togglePlay(track.id)} 
+                          className="p-2 hover:bg-gray-600 rounded-full"
+                          aria-label={track.isPlaying ? 'Pause track' : 'Play track'}
+                        >
                           {track.isPlaying ? <FiPause size={20} /> : <FiPlay size={20} />}
                         </button>
-                        <button onClick={() => removeFromPlaylist(index)} className="p-2 hover:bg-gray-600 text-gray-400 hover:text-red-400 rounded-full">
+                        <button 
+                          onClick={() => removeFromPlaylist(index)} 
+                          className="p-2 hover:bg-gray-600 text-gray-400 hover:text-red-400 rounded-full"
+                          aria-label="Remove track"
+                        >
                           <FiX size={20} />
                         </button>
                       </div>
@@ -195,6 +210,7 @@ const DjView = ({ spotifyToken }) => {
                 <button 
                   onClick={() => currentSong && togglePlay(currentSong.id)}
                   className="p-3 bg-purple-600 hover:bg-purple-700 rounded-full"
+                  aria-label={currentSong?.isPlaying ? 'Pause' : 'Play'}
                 >
                   {currentSong?.isPlaying ? <FiPause size={20} /> : <FiPlay size={20} />}
                 </button>
@@ -258,15 +274,15 @@ const DjView = ({ spotifyToken }) => {
           </div>
         </div>
 
-        {/* Chat Column (30%) */}
-        <div className="lg:w-1/3 bg-gray-800/50 border-t lg:border-t-0 lg:border-l border-gray-700 flex flex-col">
+        {/* Chat Column (30%) - Fixed Height on Mobile */}
+        <div className="lg:w-1/3 bg-gray-800/50 border-t lg:border-t-0 lg:border-l border-gray-700 flex flex-col h-[50vh] lg:h-auto">
           <div className="p-4">
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <FiMessageSquare /> Chat
             </h3>
           </div>
           
-          <div className="flex-1 overflow-y-auto px-4 pb-4">
+          <div className="flex-1 overflow-y-auto px-4 pb-4 max-h-[calc(100%-120px)]">
             {messages.map((msg) => (
               <div key={msg.id} className="mb-4 last:mb-0">
                 <div className="flex items-center gap-2">
@@ -328,6 +344,7 @@ const DjView = ({ spotifyToken }) => {
               <button 
                 onClick={() => setShowSearchModal(false)}
                 className="p-2 rounded-full hover:bg-gray-700"
+                aria-label="Close modal"
               >
                 <FiX size={20} />
               </button>
@@ -372,6 +389,7 @@ const DjView = ({ spotifyToken }) => {
                       <button 
                         onClick={() => addToPlaylist(track)}
                         className="ml-4 p-2 bg-green-600 hover:bg-green-700 rounded-full"
+                        aria-label={`Add ${track.name} to playlist`}
                       >
                         <FiPlus size={20} />
                       </button>
@@ -386,6 +404,13 @@ const DjView = ({ spotifyToken }) => {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Notification Toast */}
+      {notification && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white px-4 py-2 rounded-lg animate-bounce z-50">
+          {notification}
         </div>
       )}
     </div>
