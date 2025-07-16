@@ -25,6 +25,11 @@ const DjView = ({ spotifyToken }) => {
     }
   ]);
 
+  // Inside your component
+const [searchQuery, setSearchQuery] = useState('');
+const [searchResults, setSearchResults] = useState([]);
+const [searchOffset, setSearchOffset] = useState(0); // For pagination
+const searchCache = useRef({}); // Simple cache
   const [openModal, setOpenModal] = useState(null); // 'dj-control' | 'search' | null
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,61 +56,118 @@ const DjView = ({ spotifyToken }) => {
 
   // Spotify search
   const handleSearch = async (query) => {
+  // Utils (define these outside the component)
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
+
+const msToMinutes = (ms) => {
+  const minutes = Math.floor(ms / 60000);
+  const seconds = ((ms % 60000) / 1000).toFixed(0);
+  return `${minutes}:${seconds.padStart(2, '0')}`;
+};
+
+
+
+// Debounced search to avoid rate limits
+const debouncedSearch = useMemo(
+  () => debounce((query) => handleSearch(query), 300),
+  []
+);
+
+// Trigger search on query change (e.g., from input field)
+const handleQueryChange = (query) => {
+  setSearchQuery(query);
+  if (query.trim() === '') {
+    setSearchResults([]);
+    return;
+  }
+  debouncedSearch(query);
+};
+
+// Main search function
+const handleSearch = async (query, offset = 0) => {
+  const cacheKey = `${query}-${offset}`;
+  
+  // Return cached results if available
+  if (searchCache.current[cacheKey]) {
+    setSearchResults(prev => offset === 0 
+      ? searchCache.current[cacheKey] 
+      : [...prev, ...searchCache.current[cacheKey]]
+    );
+    return;
+  }
+
   try {
     const response = await fetch(
-      `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track,album,playlist`,
+      `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track,album,playlist&limit=10&offset=${offset}`,
       {
-        headers: {
-          'Authorization': `Bearer ${spotifyToken}`
-        }
+        headers: { 'Authorization': `Bearer ${spotifyToken}` }
       }
     );
-    const data = await response.json();
-    
-    // Combine and format results from tracks, albums, and playlists
-    const formattedResults = [
-      // Map tracks
-      ...(data.tracks?.items.map(track => ({
-        type: 'track',
-        id: track.id,
-        name: track.name,
-        artist: track.artists.map(a => a.name).join(', '),
-        duration: msToMinutes(track.duration_ms),
-        albumArt: track.album.images[0]?.url,
-        uri: track.uri
-      })) || []),
-      
-      // Map albums
-      ...(data.albums?.items.map(album => ({
-        type: 'album',
-        id: album.id,
-        name: album.name,
-        artist: album.artists.map(a => a.name).join(', '),
-        duration: null, // Albums don't have duration
-        albumArt: album.images[0]?.url,
-        uri: album.uri,
-        release_date: album.release_date,
-        total_tracks: album.total_tracks
-      })) || []),
 
-      // Map playlists
-      ...(data.playlists?.items.map(playlist => ({
-        type: 'playlist',
-        id: playlist.id,
-        name: playlist.name,
-        artist: playlist.owner.display_name, // Playlist owner instead of artist
-        duration: null, // Playlists don't have a single duration
-        albumArt: playlist.images[0]?.url,
-        uri: playlist.uri,
-        total_tracks: playlist.tracks.total
-      })) || [])
-    ];
-    
-    setSearchResults(formattedResults);
+    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+
+    const data = await response.json();
+    const formattedResults = formatSpotifyResults(data); // Extracted for clarity
+
+    // Cache results
+    searchCache.current[cacheKey] = formattedResults;
+
+    setSearchResults(prev => 
+      offset === 0 ? formattedResults : [...prev, ...formattedResults]
+    );
   } catch (error) {
-    console.error('Search error:', error);
-    setNotification('Search failed');
+    console.error('Search failed:', error);
+    setNotification(error.message || 'Search failed');
   }
+};
+
+// Format Spotify API response consistently
+const formatSpotifyResults = (data) => {
+  return [
+    ...(data.tracks?.items.map(track => ({
+      type: 'track',
+      id: track.id,
+      name: track.name,
+      artist: track.artists.map(a => a.name).join(', '),
+      duration: msToMinutes(track.duration_ms),
+      albumArt: track.album.images[0]?.url,
+      uri: track.uri
+    })) || []),
+    
+    ...(data.albums?.items.map(album => ({
+      type: 'album',
+      id: album.id,
+      name: album.name,
+      artist: album.artists.map(a => a.name).join(', '),
+      albumArt: album.images[0]?.url,
+      uri: album.uri,
+      release_date: album.release_date,
+      total_tracks: album.total_tracks
+    })) || []),
+
+    ...(data.playlists?.items.map(playlist => ({
+      type: 'playlist',
+      id: playlist.id,
+      name: playlist.name,
+      artist: playlist.owner.display_name,
+      albumArt: playlist.images[0]?.url,
+      uri: playlist.uri,
+      total_tracks: playlist.tracks.total
+    })) || [])
+  ];
+};
+
+// Load more results (attach to "Load More" button)
+const loadMoreResults = () => {
+  const newOffset = searchOffset + 10;
+  setSearchOffset(newOffset);
+  handleSearch(searchQuery, newOffset);
 };
 
   // adding track to playlist after search
@@ -252,10 +314,10 @@ const DjView = ({ spotifyToken }) => {
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="Search songs..."
+                 value={searchQuery}
+                onChange={(e) => handleQueryChange(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
+                placeholder="Search songs, albums, playlists..."
                 className="w-full pl-10 pr-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>
@@ -508,9 +570,9 @@ const DjView = ({ spotifyToken }) => {
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  placeholder="Search all of Spotify..."
+                onChange={(e) => handleQueryChange(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
+                placeholder="Search songs, albums, playlists..."
                   className="w-full pl-10 pr-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
