@@ -108,7 +108,9 @@ const DjView = ({ spotifyToken }) => {
   }
 };
 
-  /const handleAddToPlaylist = async (item) => {
+  // adding track to playlist after search
+  
+   const handleAddToPlaylist = async (item) => {
   if (item.type === 'track') {
     // Directly add single track
     addToPlaylist(item);
