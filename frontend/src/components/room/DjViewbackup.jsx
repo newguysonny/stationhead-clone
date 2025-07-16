@@ -222,7 +222,7 @@ const loadMoreResults = () => {
 };
     // remove playlist track
    const removeFromPlaylist = (index) => {
-      if (index < 0 || index >= playlist.length) return;
+      if (index < 0 || index >= playlist.length || playlist.length === 0) return;
      const wasPlaying = playlist[index].isPlaying;
      const newPlaylist = playlist.filter((_, i) => i !== index);
      
