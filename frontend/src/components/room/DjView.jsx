@@ -5,7 +5,7 @@ import {
 } from 'react-icons/fi';
 
 const DjView = ({ spotifyToken }) => {
-  // State management
+  // State
   const [playlist, setPlaylist] = useState([
     {
       id: '1',
@@ -29,7 +29,7 @@ const DjView = ({ spotifyToken }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchModal, setShowSearchModal] = useState(false);
-  const [activeTab, setActiveTab] = useState('playlist'); // Added tab state
+  const [activeTab, setActiveTab] = useState('playlist');
   const [isConnected, setIsConnected] = useState(false);
   const [likes, setLikes] = useState(1200);
   const [listeners, setListeners] = useState(24);
@@ -44,12 +44,12 @@ const DjView = ({ spotifyToken }) => {
   const chatEndRef = useRef(null);
   const currentSong = playlist.find(track => track.isPlaying) || playlist[0];
 
-  // Auto-scroll chat to bottom
+  // Auto-scroll chat
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Mock search function
+  // Mock search
   const handleSearch = () => {
     setSearchResults([
       {
@@ -70,40 +70,20 @@ const DjView = ({ spotifyToken }) => {
   };
 
   // Playlist actions
-  const addToPlaylist = (track) => {
-    setPlaylist([...playlist, { ...track, isPlaying: false }]);
-    // Removed modal close here to allow multiple adds
-  };
-
-  const removeFromPlaylist = (index) => {
-    const newPlaylist = [...playlist];
-    newPlaylist.splice(index, 1);
-    setPlaylist(newPlaylist);
-  };
-
-  const togglePlay = (id) => {
-    setPlaylist(playlist.map(track => ({
-      ...track,
-      isPlaying: track.id === id ? !track.isPlaying : false
-    })));
-  };
+  const addToPlaylist = (track) => setPlaylist([...playlist, { ...track, isPlaying: false }]);
+  const removeFromPlaylist = (index) => setPlaylist(playlist.filter((_, i) => i !== index));
+  const togglePlay = (id) => setPlaylist(playlist.map(track => ({
+    ...track,
+    isPlaying: track.id === id ? !track.isPlaying : false
+  })));
 
   // Chat actions
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (message.trim()) {
-      setMessages([...messages, {
-        id: messages.length + 1,
-        user: 'You',
-        text: message,
-        icon: '😊'
-      }]);
+      setMessages([...messages, { id: messages.length + 1, user: 'You', text: message, icon: '😊' }]);
       setMessage('');
     }
-  };
-
-  const handleLike = () => {
-    setLikes(likes + 1);
   };
 
   return (
@@ -111,102 +91,65 @@ const DjView = ({ spotifyToken }) => {
       {/* Mobile Header */}
       <div className="lg:hidden bg-gradient-to-r from-purple-600 to-blue-500 p-4 flex justify-between items-center">
         <h1 className="text-xl font-bold flex items-center gap-2">
-          <FiMusic className="text-white" /> 
-          Vinyl & Veggie Night
+          <FiMusic /> Vinyl & Veggie Night
         </h1>
         <button 
           onClick={() => setShowMobileMenu(!showMobileMenu)}
-          className="p-2 rounded-full hover:bg-purple-700 transition-all duration-300"
+          className="p-2 rounded-full hover:bg-purple-700 transition-all"
         >
           {showMobileMenu ? <FiX size={20} /> : <FiMenu size={20} />}
         </button>
       </div>
 
-      {/* Main Content */}
+      {/* Main Layout */}
       <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] lg:h-screen">
-        {/* Playlist Column */}
+        {/* Playlist Column (30%) */}
         <div className={`
-          fixed lg:static inset-0 z-40 lg:z-auto
-          bg-gray-800 overflow-y-auto
-          transform ${showMobileMenu ? 'translate-x-0' : '-translate-x-full'} 
-          lg:translate-x-0
-          transition-transform duration-300 ease-in-out
-          lg:w-1/3 lg:block
+          fixed lg:static inset-0 z-40 lg:z-auto bg-gray-800 overflow-y-auto
+          transform ${showMobileMenu ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
+          transition-transform duration-300 ease-in-out lg:w-1/3 flex flex-col
         `}>
-          <div className="p-4 relative h-full">
-            <button 
-              onClick={() => setShowMobileMenu(false)}
-              className="lg:hidden absolute top-4 right-4 p-2 rounded-full hover:bg-gray-700"
-            >
-              <FiX size={20} />
-            </button>
-            
+          <div className="p-4 flex-1 overflow-y-auto">
             {/* Tabs */}
             <div className="flex border-b border-gray-700 mb-4">
-              <button
-                onClick={() => setActiveTab('playlist')}
-                className={`px-4 py-2 ${activeTab === 'playlist' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400'}`}
-              >
-                Playlist
-              </button>
-              <button
-                onClick={() => setActiveTab('guests')}
-                className={`px-4 py-2 ${activeTab === 'guests' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400'}`}
-              >
-                Guests
-              </button>
-              <button
-                onClick={() => setActiveTab('requests')}
-                className={`px-4 py-2 ${activeTab === 'requests' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400'}`}
-              >
-                Requests
-              </button>
+              {['playlist', 'guests', 'requests'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-4 py-2 capitalize ${activeTab === tab ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400'}`}
+                >
+                  {tab}
+                </button>
+              ))}
             </div>
 
+            {/* Tab Content */}
             {activeTab === 'playlist' && (
               <>
                 <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <FiMusic /> Playlist
                 </h2>
-                
                 <div className="space-y-3 mb-6">
                   {playlist.map((track, index) => (
-                    <div 
-                      key={`${track.id}-${index}`} 
-                      className={`flex items-center p-3 rounded-lg ${track.isPlaying ? 'bg-purple-900/50' : 'bg-gray-700/50 hover:bg-gray-700'}`}
-                    >
-                      <img 
-                        src={track.albumArt} 
-                        alt={track.name} 
-                        className="w-12 h-12 rounded-md mr-4"
-                      />
+                    <div key={track.id} className={`flex items-center p-3 rounded-lg ${track.isPlaying ? 'bg-purple-900/50' : 'bg-gray-700/50 hover:bg-gray-700'}`}>
+                      <img src={track.albumArt} alt={track.name} className="w-12 h-12 rounded-md mr-4" />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{track.name}</p>
                         <p className="text-sm text-gray-400 truncate">{track.artist} • {track.duration}</p>
                       </div>
-                      <div className="flex items-center gap-3 ml-4">
-                        <button 
-                          onClick={() => togglePlay(track.id)}
-                          className="p-2 rounded-full hover:bg-gray-600"
-                        >
+                      <div className="flex gap-3 ml-4">
+                        <button onClick={() => togglePlay(track.id)} className="p-2 hover:bg-gray-600 rounded-full">
                           {track.isPlaying ? <FiPause size={20} /> : <FiPlay size={20} />}
                         </button>
-                        <button 
-                          onClick={() => removeFromPlaylist(index)}
-                          className="p-2 rounded-full hover:bg-gray-600 text-gray-400 hover:text-red-400"
-                        >
+                        <button onClick={() => removeFromPlaylist(index)} className="p-2 hover:bg-gray-600 text-gray-400 hover:text-red-400 rounded-full">
                           <FiX size={20} />
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
-                
                 <button
-                  onClick={() => {
-                    setShowSearchModal(true);
-                    setShowMobileMenu(false);
-                  }}
+                  onClick={() => setShowSearchModal(true)}
                   className="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-lg flex items-center justify-center gap-2 font-medium"
                 >
                   <FiPlus /> Add Music
@@ -234,27 +177,147 @@ const DjView = ({ spotifyToken }) => {
               </div>
             )}
           </div>
+
+          {/* Fixed Player Controls */}
+          <div className="sticky bottom-0 bg-gray-800 border-t border-gray-700 p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <img src={currentSong?.albumArt || ''} alt="Now Playing" className="w-10 h-10 rounded-md" />
+                <div>
+                  <p className="font-medium text-sm">{currentSong?.name || 'No track playing'}</p>
+                  <p className="text-xs text-gray-400">{currentSong?.artist || 'Select a track'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <button className="p-2 hover:bg-gray-700 rounded-full">
+                  <FiSkipForward className="transform rotate-180" size={18} />
+                </button>
+                <button 
+                  onClick={() => currentSong && togglePlay(currentSong.id)}
+                  className="p-3 bg-purple-600 hover:bg-purple-700 rounded-full"
+                >
+                  {currentSong?.isPlaying ? <FiPause size={20} /> : <FiPlay size={20} />}
+                </button>
+                <button className="p-2 hover:bg-gray-700 rounded-full">
+                  <FiSkipForward size={18} />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Main Content Column */}
+        {/* Main Content Column (30%) */}
         <div className="flex-1 overflow-y-auto p-4 lg:p-6 lg:w-1/3">
-          {/* ... [Main content remains the same] ... */}
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold flex items-center justify-center gap-2">
+              <FiMusic className="text-purple-400" /> Vinyl & Veggie Night
+            </h1>
+            <p className="text-purple-300">By BTS</p>
+          </div>
+
+          <div className="bg-purple-900/30 border border-purple-500 rounded-lg p-3 text-center mb-6 animate-pulse">
+            <p className="font-medium">Syncing as ARMY</p>
+          </div>
+
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center text-2xl mb-2">
+              🦄
+            </div>
+            <p className="flex items-center gap-2">
+              @FoodieDJ 
+              <button onClick={() => setLikes(likes + 1)} className="flex items-center text-pink-500">
+                <FiHeart className="mr-1" /> {likes.toLocaleString()}
+              </button>
+            </p>
+          </div>
+
+          <div className="bg-gray-800/50 rounded-xl p-4 mb-6">
+            <h2 className="text-lg font-semibold mb-3 text-center">Now Playing</h2>
+            <div className="flex items-center justify-center gap-4">
+              <div className="text-4xl">🎧</div>
+              <div>
+                <h3 className="font-bold text-xl">{currentSong?.name || 'No track playing'}</h3>
+                <p className="text-purple-300">{currentSong?.artist || 'Select a track'}</p>
+              </div>
+            </div>
+          </div>
+
+          <button 
+            onClick={() => setIsConnected(!isConnected)}
+            className={`w-full py-3 rounded-full mb-6 flex items-center justify-center gap-2 font-medium ${
+              isConnected ? 'bg-green-600' : 'bg-purple-600 hover:bg-purple-700'
+            }`}
+          >
+            <FiMusic />
+            {isConnected ? 'Connected to Spotify' : 'Connect Spotify'}
+          </button>
+
+          <div className="flex justify-center gap-6 mb-8 text-gray-300">
+            <span className="flex items-center gap-1">▶️ {plays.toLocaleString()}</span>
+            <span className="flex items-center gap-1">👥 {listeners.toLocaleString()}</span>
+          </div>
         </div>
 
-        {/* Chat Column - Fixed positioning */}
-        <div className="lg:w-1/3 bg-gray-800/50 border-t lg:border-t-0 lg:border-l border-gray-700 flex flex-col" style={{
-          height: 'calc(100vh - 64px)',
-          position: 'fixed',
-          right: 0,
-          width: '100%',
-          maxWidth: '33.333333%',
-          display: showMobileMenu ? 'none' : 'flex'
-        }}>
-          {/* ... [Chat content remains the same] ... */}
+        {/* Chat Column (30%) */}
+        <div className="lg:w-1/3 bg-gray-800/50 border-t lg:border-t-0 lg:border-l border-gray-700 flex flex-col">
+          <div className="p-4">
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <FiMessageSquare /> Chat
+            </h3>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto px-4 pb-4">
+            {messages.map((msg) => (
+              <div key={msg.id} className="mb-4 last:mb-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{msg.icon}</span>
+                  <span className="font-bold">@{msg.user}</span>
+                </div>
+                <p className="ml-10 mt-1">{msg.text}</p>
+              </div>
+            ))}
+            <div ref={chatEndRef} />
+          </div>
+          
+          <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Send a message..."
+                className="flex-1 bg-gray-700 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+              <button 
+                type="submit"
+                className="bg-purple-600 hover:bg-purple-700 w-10 h-10 rounded-full flex items-center justify-center"
+              >
+                →
+              </button>
+            </div>
+          </form>
+
+          <div className="flex justify-around p-3 border-t border-gray-700 bg-gray-800/70">
+            <button className="p-2 hover:bg-gray-700 rounded-full text-gray-300 hover:text-purple-400">
+              <FiMessageSquare size={20} />
+            </button>
+            <button className="p-2 hover:bg-gray-700 rounded-full text-gray-300 hover:text-blue-400">
+              <FiShoppingCart size={20} />
+            </button>
+            <button 
+              onClick={() => setLikes(likes + 1)}
+              className="p-2 hover:bg-gray-700 rounded-full text-pink-500 hover:text-pink-400"
+            >
+              <FiHeart size={20} />
+            </button>
+            <button className="p-2 hover:bg-gray-700 rounded-full text-gray-300 hover:text-green-400">
+              <FiShare2 size={20} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Search Modal - Updated to stay open after adding tracks */}
+      {/* Search Modal */}
       {showSearchModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-800 rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
