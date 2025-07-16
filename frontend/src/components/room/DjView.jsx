@@ -26,9 +26,10 @@ const DjView = ({ spotifyToken }) => {
   ]);
 
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showMainModal, setShowMainModal] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showSearchModal, setShowSearchModal] = useState(false);
   const [activeTab, setActiveTab] = useState('playlist');
   const [isConnected, setIsConnected] = useState(false);
   const [likes, setLikes] = useState(1200);
@@ -75,6 +76,7 @@ const DjView = ({ spotifyToken }) => {
     setPlaylist([...playlist, { ...track, isPlaying: false }]);
     setNotification(`${track.name} added to queue`);
     setTimeout(() => setNotification(null), 3000);
+    setShowSearchModal(false);
   };
 
   const removeFromPlaylist = (index) => setPlaylist(playlist.filter((_, i) => i !== index));
@@ -91,6 +93,38 @@ const DjView = ({ spotifyToken }) => {
       setMessage('');
     }
   };
+
+  // Player Controls Component
+  const PlayerControls = () => (
+    <div className="flex items-center justify-between p-3 bg-gray-800 border-t border-gray-700">
+      <div className="flex items-center gap-3">
+        <img 
+          src={currentSong?.albumArt} 
+          alt="Now Playing" 
+          className="w-10 h-10 rounded-md"
+        />
+        <div className="min-w-0">
+          <p className="font-medium text-sm truncate">{currentSong?.name || 'No track'}</p>
+          <p className="text-xs text-gray-400 truncate">{currentSong?.artist || 'Select track'}</p>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <button className="p-2 hover:bg-gray-700 rounded-full">
+          <FiSkipForward className="transform rotate-180" size={18} />
+        </button>
+        <button 
+          onClick={() => currentSong && togglePlay(currentSong.id)}
+          className="p-2 bg-purple-600 hover:bg-purple-700 rounded-full"
+          aria-label={currentSong?.isPlaying ? 'Pause' : 'Play'}
+        >
+          {currentSong?.isPlaying ? <FiPause size={18} /> : <FiPlay size={18} />}
+        </button>
+        <button className="p-2 hover:bg-gray-700 rounded-full">
+          <FiSkipForward size={18} />
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -110,116 +144,97 @@ const DjView = ({ spotifyToken }) => {
 
       {/* Main Layout */}
       <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] lg:h-screen">
-        {/* Playlist Column (30%) */}
+        {/* Desktop: Playlist Column (30%) */}
         <div className={`
           fixed lg:static inset-0 z-40 lg:z-auto bg-gray-800 overflow-y-auto
           transform ${showMobileMenu ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
           transition-transform duration-300 ease-in-out lg:w-1/3 flex flex-col
         `}>
           <div className="p-4 flex-1 overflow-y-auto">
-            {/* Tabs */}
-            <div className="flex border-b border-gray-700 mb-4">
-              {['playlist', 'guests', 'requests'].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 capitalize ${activeTab === tab ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400'}`}
-                >
-                  {tab}
-                </button>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 lg:hidden">
+              <FiMusic /> Playlist
+            </h2>
+            <div className="hidden lg:block p-4 border-b border-gray-700">
+              <h3 className="text-xl font-bold">Playlist</h3>
+            </div>
+            
+            <div className="space-y-3 mb-6">
+              {playlist.map((track, index) => (
+                <div key={track.id} className={`flex items-center p-3 rounded-lg ${track.isPlaying ? 'bg-purple-900/50' : 'bg-gray-700/50 hover:bg-gray-700'}`}>
+                  <img src={track.albumArt} alt={track.name} className="w-12 h-12 rounded-md mr-3" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{track.name}</p>
+                    <p className="text-sm text-gray-400 truncate">{track.artist} • {track.duration}</p>
+                  </div>
+                  <div className="flex gap-3 ml-4">
+                    <button 
+                      onClick={() => togglePlay(track.id)} 
+                      className="p-2 hover:bg-gray-600 rounded-full"
+                      aria-label={track.isPlaying ? 'Pause track' : 'Play track'}
+                    >
+                      {track.isPlaying ? <FiPause size={20} /> : <FiPlay size={20} />}
+                    </button>
+                    <button 
+                      onClick={() => removeFromPlaylist(index)} 
+                      className="p-2 hover:bg-gray-600 text-gray-400 hover:text-red-400 rounded-full"
+                      aria-label="Remove track"
+                    >
+                      <FiX size={20} />
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
-
-            {/* Tab Content */}
-            {activeTab === 'playlist' && (
-              <>
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <FiMusic /> Playlist
-                </h2>
-                <div className="space-y-3 mb-6">
-                  {playlist.map((track, index) => (
-                    <div key={track.id} className={`flex items-center p-3 rounded-lg ${track.isPlaying ? 'bg-purple-900/50' : 'bg-gray-700/50 hover:bg-gray-700'}`}>
-                      <img src={track.albumArt} alt={track.name} className="w-12 h-12 rounded-md mr-4" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{track.name}</p>
-                        <p className="text-sm text-gray-400 truncate">{track.artist} • {track.duration}</p>
-                      </div>
-                      <div className="flex gap-3 ml-4">
-                        <button 
-                          onClick={() => togglePlay(track.id)} 
-                          className="p-2 hover:bg-gray-600 rounded-full"
-                          aria-label={track.isPlaying ? 'Pause track' : 'Play track'}
-                        >
-                          {track.isPlaying ? <FiPause size={20} /> : <FiPlay size={20} />}
-                        </button>
-                        <button 
-                          onClick={() => removeFromPlaylist(index)} 
-                          className="p-2 hover:bg-gray-600 text-gray-400 hover:text-red-400 rounded-full"
-                          aria-label="Remove track"
-                        >
-                          <FiX size={20} />
-                        </button>
-                      </div>
+            
+            <button
+              onClick={() => setShowMainModal(true)}
+              className="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-lg flex items-center justify-center gap-2 font-medium lg:hidden"
+            >
+              <FiPlus /> Add Music
+            </button>
+            
+            {/* Desktop Search */}
+            <div className="hidden lg:block p-4">
+              <div className="relative mb-4">
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  placeholder="Search songs..."
+                  className="w-full pl-10 pr-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <button
+                onClick={handleSearch}
+                className="w-full py-2 bg-purple-600 hover:bg-purple-700 rounded-lg mb-4"
+              >
+                Search
+              </button>
+              <div className="divide-y divide-gray-700">
+                {searchResults.map(track => (
+                  <div key={track.id} className="flex items-center p-3 hover:bg-gray-700/50">
+                    <img src={track.albumArt} alt={track.name} className="w-12 h-12 rounded-md mr-3" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{track.name}</p>
+                      <p className="text-sm text-gray-400 truncate">{track.artist} • {track.duration}</p>
                     </div>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setShowSearchModal(true)}
-                  className="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-lg flex items-center justify-center gap-2 font-medium"
-                >
-                  <FiPlus /> Add Music
-                </button>
-              </>
-            )}
-
-            {activeTab === 'guests' && (
-              <div className="p-4">
-                <h2 className="text-xl font-semibold mb-4">Guest Management</h2>
-                <div className="flex items-center gap-3 p-3 bg-gray-700/50 rounded-lg">
-                  <FiUser size={20} />
-                  <span>Guest list will appear here</span>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'requests' && (
-              <div className="p-4">
-                <h2 className="text-xl font-semibold mb-4">Song Requests</h2>
-                <div className="flex items-center gap-3 p-3 bg-gray-700/50 rounded-lg">
-                  <FiMusic size={20} />
-                  <span>Song requests will appear here</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Fixed Player Controls */}
-          <div className="sticky bottom-0 bg-gray-800 border-t border-gray-700 p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img src={currentSong?.albumArt || ''} alt="Now Playing" className="w-10 h-10 rounded-md" />
-                <div>
-                  <p className="font-medium text-sm">{currentSong?.name || 'No track playing'}</p>
-                  <p className="text-xs text-gray-400">{currentSong?.artist || 'Select a track'}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <button className="p-2 hover:bg-gray-700 rounded-full">
-                  <FiSkipForward className="transform rotate-180" size={18} />
-                </button>
-                <button 
-                  onClick={() => currentSong && togglePlay(currentSong.id)}
-                  className="p-3 bg-purple-600 hover:bg-purple-700 rounded-full"
-                  aria-label={currentSong?.isPlaying ? 'Pause' : 'Play'}
-                >
-                  {currentSong?.isPlaying ? <FiPause size={20} /> : <FiPlay size={20} />}
-                </button>
-                <button className="p-2 hover:bg-gray-700 rounded-full">
-                  <FiSkipForward size={18} />
-                </button>
+                    <button 
+                      onClick={() => addToPlaylist(track)}
+                      className="ml-2 p-2 bg-green-600 hover:bg-green-700 rounded-full"
+                      aria-label={`Add ${track.name} to playlist`}
+                    >
+                      <FiPlus size={18} />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
+          
+          {/* Player Controls (Desktop & Mobile) */}
+          <PlayerControls />
         </div>
 
         {/* Main Content Column (30%) */}
@@ -333,15 +348,15 @@ const DjView = ({ spotifyToken }) => {
         </div>
       </div>
 
-      {/* Mobile Search Modal */}
-      {showSearchModal && (
+      {/* Mobile: Main DJ Control Modal */}
+      {showMainModal && (
         <div className="lg:hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-800 rounded-xl w-full max-h-[90vh] flex flex-col">
-            {/* Fixed Header with Close Button */}
-            <div className="sticky top-0 z-10 bg-gray-800 flex justify-between items-center p-4 border-b border-gray-700">
+            {/* Fixed Header */}
+            <div className="sticky top-0 z-20 bg-gray-800 flex justify-between items-center p-4 border-b border-gray-700">
               <h3 className="text-xl font-semibold">DJ CONTROL</h3>
               <button
-                onClick={() => setShowSearchModal(false)}
+                onClick={() => setShowMainModal(false)}
                 className="p-1 text-white hover:bg-gray-700 rounded-full"
                 aria-label="Close modal"
               >
@@ -366,38 +381,34 @@ const DjView = ({ spotifyToken }) => {
             <div className="overflow-y-auto flex-1 p-4">
               {activeTab === 'playlist' && (
                 <>
-                  <div className="relative mb-4">
-                    <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                      placeholder="Search all of Spotify..."
-                      className="w-full pl-10 pr-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                  </div>
                   <button
-                    onClick={handleSearch}
-                    className="w-full py-2 bg-purple-600 hover:bg-purple-700 rounded-lg mb-4"
+                    onClick={() => setShowSearchModal(true)}
+                    className="w-full py-2 bg-purple-600 hover:bg-purple-700 rounded-lg mb-4 flex items-center justify-center gap-2"
                   >
-                    Search
+                    <FiSearch /> Search Songs
                   </button>
-                  <div className="divide-y divide-gray-700">
-                    {searchResults.map(track => (
-                      <div key={track.id} className="flex items-center p-3 hover:bg-gray-700/50">
+                  <div className="space-y-3">
+                    {playlist.map((track, index) => (
+                      <div key={track.id} className="flex items-center p-3 rounded-lg bg-gray-700/50 hover:bg-gray-700">
                         <img src={track.albumArt} alt={track.name} className="w-12 h-12 rounded-md mr-3" />
                         <div className="flex-1 min-w-0">
                           <p className="font-medium truncate">{track.name}</p>
                           <p className="text-sm text-gray-400 truncate">{track.artist} • {track.duration}</p>
                         </div>
-                        <button 
-                          onClick={() => addToPlaylist(track)}
-                          className="ml-2 p-2 bg-green-600 hover:bg-green-700 rounded-full"
-                          aria-label={`Add ${track.name} to playlist`}
-                        >
-                          <FiPlus size={18} />
-                        </button>
+                        <div className="flex gap-3 ml-4">
+                          <button 
+                            onClick={() => togglePlay(track.id)} 
+                            className="p-2 hover:bg-gray-600 rounded-full"
+                          >
+                            {track.isPlaying ? <FiPause size={20} /> : <FiPlay size={20} />}
+                          </button>
+                          <button 
+                            onClick={() => removeFromPlaylist(index)} 
+                            className="p-2 hover:bg-gray-600 text-gray-400 hover:text-red-400 rounded-full"
+                          >
+                            <FiX size={20} />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -424,30 +435,63 @@ const DjView = ({ spotifyToken }) => {
             </div>
 
             {/* Fixed Player Controls */}
-            <div className="sticky bottom-0 bg-gray-800 border-t border-gray-700 p-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <img src={currentSong?.albumArt} alt="Now Playing" className="w-10 h-10 rounded-md" />
-                  <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">{currentSong?.name || 'No track playing'}</p>
-                    <p className="text-xs text-gray-400 truncate">{currentSong?.artist || 'Select a track'}</p>
+            <PlayerControls />
+          </div>
+        </div>
+      )}
+
+      {/* Mobile: Search Modal (Nested) */}
+      {showSearchModal && (
+        <div className="lg:hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-800 rounded-xl w-full max-h-[90vh] flex flex-col">
+            {/* Search Header */}
+            <div className="sticky top-0 z-20 bg-gray-800 flex justify-between items-center p-4 border-b border-gray-700">
+              <h3 className="text-xl font-semibold">Search Songs</h3>
+              <button
+                onClick={() => setShowSearchModal(false)}
+                className="p-1 text-white hover:bg-gray-700 rounded-full"
+                aria-label="Close search"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+
+            {/* Search Content */}
+            <div className="overflow-y-auto flex-1 p-4">
+              <div className="relative mb-4">
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  placeholder="Search all of Spotify..."
+                  className="w-full pl-10 pr-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <button
+                onClick={handleSearch}
+                className="w-full py-2 bg-purple-600 hover:bg-purple-700 rounded-lg mb-4"
+              >
+                Search
+              </button>
+              <div className="divide-y divide-gray-700">
+                {searchResults.map(track => (
+                  <div key={track.id} className="flex items-center p-3 hover:bg-gray-700/50">
+                    <img src={track.albumArt} alt={track.name} className="w-12 h-12 rounded-md mr-3" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{track.name}</p>
+                      <p className="text-sm text-gray-400 truncate">{track.artist} • {track.duration}</p>
+                    </div>
+                    <button 
+                      onClick={() => addToPlaylist(track)}
+                      className="ml-2 p-2 bg-green-600 hover:bg-green-700 rounded-full"
+                      aria-label={`Add ${track.name} to playlist`}
+                    >
+                      <FiPlus size={18} />
+                    </button>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button className="p-2 hover:bg-gray-700 rounded-full">
-                    <FiSkipForward className="transform rotate-180" size={18} />
-                  </button>
-                  <button 
-                    onClick={() => currentSong && togglePlay(currentSong.id)}
-                    className="p-2 bg-purple-600 hover:bg-purple-700 rounded-full"
-                    aria-label={currentSong?.isPlaying ? 'Pause' : 'Play'}
-                  >
-                    {currentSong?.isPlaying ? <FiPause size={18} /> : <FiPlay size={18} />}
-                  </button>
-                  <button className="p-2 hover:bg-gray-700 rounded-full">
-                    <FiSkipForward size={18} />
-                  </button>
-                </div>
+                ))}
               </div>
             </div>
           </div>
