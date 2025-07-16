@@ -58,17 +58,12 @@ const searchCache = useRef({}); // Simple cache
   // Spotify search
   const handleSearch = async (query) => {
 
-
-
-
-
-
 // Debounced search to avoid rate limits
 const debouncedSearch = useMemo(
-  () => debounce((query) => handleSearch(query), 300),
-  []
-);
-
+     () => debounce(handleSearch, 300),
+     [handleSearch]  // Add dependency
+   );
+    
 // Trigger search on query change (e.g., from input field)
 const handleQueryChange = (query) => {
   setSearchQuery(query);
@@ -161,16 +156,20 @@ const loadMoreResults = () => {
 };
 
   // adding track to playlist after search
-  const addToPlaylist = (track) => {
-         setPlaylist([...playlist, { ...track, isPlaying: false }]);
-       };
-
-   const handleAddToPlaylist = async (item) => {
+  const handleAddToPlaylist = async (item) => {
+  // Handle single track addition
   if (item.type === 'track') {
-    // Directly add single track
-    addToPlaylist(item);
-  } else if (item.type === 'album' || item.type === 'playlist') {
-    // First fetch all tracks from the album/playlist
+    if (playlist.some(t => t.id === item.id)) {
+      setNotification(`${item.name} is already in the playlist`);
+      return;
+    }
+    setPlaylist([...playlist, { ...item, isPlaying: false }]);
+    setNotification(`${item.name} added to queue`);
+    return;
+  }
+
+  // Handle albums/playlists
+  if (item.type === 'album' || item.type === 'playlist') {
     try {
       const endpoint = item.type === 'album' 
         ? `https://api.spotify.com/v1/albums/${item.id}/tracks`
@@ -180,18 +179,26 @@ const loadMoreResults = () => {
         headers: { 'Authorization': `Bearer ${spotifyToken}` }
       });
       const data = await response.json();
-      
-      // Add all tracks to playlist
-      const tracksToAdd = data.items.map(track => ({
-        type: 'track',
-        id: track.id,
-        name: track.name,
-        artist: track.artists.map(a => a.name).join(', '),
-        duration: msToMinutes(track.duration_ms),
-        albumArt: item.albumArt, // Use album/playlist image as fallback
-        uri: track.uri
-      }));
-      
+
+      // Filter out duplicates before adding
+      const tracksToAdd = data.items
+        .map(track => ({
+          type: 'track',
+          id: track.id,
+          name: track.name,
+          artist: track.artists.map(a => a.name).join(', '),
+          duration: msToMinutes(track.duration_ms),
+          albumArt: item.albumArt,
+          uri: track.uri,
+          isPlaying: false
+        }))
+        .filter(track => !playlist.some(t => t.id === track.id)); // Skip duplicates
+
+      if (tracksToAdd.length === 0) {
+        setNotification(`All tracks from ${item.name} are already in the playlist`);
+        return;
+      }
+
       setPlaylist([...playlist, ...tracksToAdd]);
       setNotification(`Added ${tracksToAdd.length} songs from ${item.name}`);
     } catch (error) {
@@ -200,7 +207,7 @@ const loadMoreResults = () => {
     }
   }
 };
-
+    
   // toggle track
    const togglePlay = (id) => {
   const targetTrack = playlist.find(track => track.id === id);
@@ -215,6 +222,7 @@ const loadMoreResults = () => {
 };
     // remove playlist track
    const removeFromPlaylist = (index) => {
+      if (index < 0 || index >= playlist.length) return;
      const wasPlaying = playlist[index].isPlaying;
      const newPlaylist = playlist.filter((_, i) => i !== index);
      
