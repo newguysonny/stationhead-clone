@@ -274,134 +274,174 @@ const DjView = ({ spotifyToken }) => {
           </div>
         </div>
 
-        {/* Chat Column (30%) - Fixed Height on Mobile */}
-        <div className="lg:w-1/3 bg-gray-800/50 border-t lg:border-t-0 lg:border-l border-gray-700 flex flex-col h-[50vh] lg:h-auto">
-          <div className="p-4">
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <FiMessageSquare /> Chat
+        {/* Desktop: Add Music Section (30%) - Hidden on mobile */}
+        <div className="hidden lg:block lg:w-1/3 bg-gray-800 border-l border-gray-700 overflow-y-auto">
+          <div className="p-4 sticky top-0 bg-gray-800 flex justify-between items-center border-b border-gray-700">
+            <h3 className="text-xl font-semibold">
+              <FiMusic className="inline mr-2" /> 
+              Add Music
             </h3>
+            <button
+              onClick={() => setShowSearchModal(false)}
+              className="p-1 rounded-full hover:bg-gray-700 text-white"
+              aria-label="Close section"
+            >
+              <FiX size={24} />
+            </button>
           </div>
-          
-          <div className="flex-1 overflow-y-auto px-4 pb-4 max-h-[calc(100%-120px)]">
-            {messages.map((msg) => (
-              <div key={msg.id} className="mb-4 last:mb-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{msg.icon}</span>
-                  <span className="font-bold">@{msg.user}</span>
-                </div>
-                <p className="ml-10 mt-1">{msg.text}</p>
-              </div>
-            ))}
-            <div ref={chatEndRef} />
-          </div>
-          
-          <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700">
-            <div className="flex gap-2">
+          <div className="p-4">
+            <div className="relative mb-4">
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Send a message..."
-                className="flex-1 bg-gray-700 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                placeholder="Search all of Spotify..."
+                className="w-full pl-10 pr-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
-              <button 
-                type="submit"
-                className="bg-purple-600 hover:bg-purple-700 w-10 h-10 rounded-full flex items-center justify-center"
-              >
-                →
-              </button>
             </div>
-          </form>
-
-          <div className="flex justify-around p-3 border-t border-gray-700 bg-gray-800/70">
-            <button className="p-2 hover:bg-gray-700 rounded-full text-gray-300 hover:text-purple-400">
-              <FiMessageSquare size={20} />
-            </button>
-            <button className="p-2 hover:bg-gray-700 rounded-full text-gray-300 hover:text-blue-400">
-              <FiShoppingCart size={20} />
-            </button>
-            <button 
-              onClick={() => setLikes(likes + 1)}
-              className="p-2 hover:bg-gray-700 rounded-full text-pink-500 hover:text-pink-400"
+            <button
+              onClick={handleSearch}
+              className="w-full py-2 bg-purple-600 hover:bg-purple-700 rounded-lg mb-4"
             >
-              <FiHeart size={20} />
+              Search
             </button>
-            <button className="p-2 hover:bg-gray-700 rounded-full text-gray-300 hover:text-green-400">
-              <FiShare2 size={20} />
-            </button>
+            <div className="divide-y divide-gray-700">
+              {searchResults.map(track => (
+                <div key={track.id} className="flex items-center p-3 hover:bg-gray-700/50">
+                  <img src={track.albumArt} alt={track.name} className="w-12 h-12 rounded-md mr-3" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{track.name}</p>
+                    <p className="text-sm text-gray-400 truncate">{track.artist} • {track.duration}</p>
+                  </div>
+                  <button 
+                    onClick={() => addToPlaylist(track)}
+                    className="ml-2 p-2 bg-green-600 hover:bg-green-700 rounded-full"
+                    aria-label={`Add ${track.name} to playlist`}
+                  >
+                    <FiPlus size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Search Modal */}
-      {showSearchModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-800 rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
-            <div className="flex justify-between items-center p-4 border-b border-gray-700">
-              <h3 className="text-xl font-semibold flex items-center gap-2">
-                <FiMusic /> Add Music from Spotify
+        {/* Chat Column (30%) - Hidden when search is open on desktop */}
+        {!showSearchModal && (
+          <div className="lg:w-1/3 bg-gray-800/50 border-t lg:border-t-0 lg:border-l border-gray-700 flex flex-col h-[50vh] lg:h-auto">
+            <div className="p-4">
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <FiMessageSquare /> Chat
               </h3>
-              <button 
-                onClick={() => setShowSearchModal(false)}
-                className="p-2 rounded-full hover:bg-gray-700"
-                aria-label="Close modal"
-              >
-                <FiX size={20} />
-              </button>
             </div>
             
-            <div className="p-4 border-b border-gray-700">
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    placeholder="Search all of Spotify..."
-                    className="w-full pl-10 pr-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
+            <div className="flex-1 overflow-y-auto px-4 pb-4 max-h-[calc(100%-120px)]">
+              {messages.map((msg) => (
+                <div key={msg.id} className="mb-4 last:mb-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{msg.icon}</span>
+                    <span className="font-bold">@{msg.user}</span>
+                  </div>
+                  <p className="ml-10 mt-1">{msg.text}</p>
                 </div>
-                <button
-                  onClick={handleSearch}
-                  className="px-4 bg-purple-600 hover:bg-purple-700 rounded-lg"
+              ))}
+              <div ref={chatEndRef} />
+            </div>
+            
+            <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Send a message..."
+                  className="flex-1 bg-gray-700 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <button 
+                  type="submit"
+                  className="bg-purple-600 hover:bg-purple-700 w-10 h-10 rounded-full flex items-center justify-center"
                 >
-                  Search
+                  →
                 </button>
               </div>
+            </form>
+
+            <div className="flex justify-around p-3 border-t border-gray-700 bg-gray-800/70">
+              <button className="p-2 hover:bg-gray-700 rounded-full text-gray-300 hover:text-purple-400">
+                <FiMessageSquare size={20} />
+              </button>
+              <button className="p-2 hover:bg-gray-700 rounded-full text-gray-300 hover:text-blue-400">
+                <FiShoppingCart size={20} />
+              </button>
+              <button 
+                onClick={() => setLikes(likes + 1)}
+                className="p-2 hover:bg-gray-700 rounded-full text-pink-500 hover:text-pink-400"
+              >
+                <FiHeart size={20} />
+              </button>
+              <button className="p-2 hover:bg-gray-700 rounded-full text-gray-300 hover:text-green-400">
+                <FiShare2 size={20} />
+              </button>
             </div>
-            
-            <div className="flex-1 overflow-y-auto">
-              {searchResults.length > 0 ? (
-                <div className="divide-y divide-gray-700">
-                  {searchResults.map(track => (
-                    <div key={track.id} className="flex items-center p-4 hover:bg-gray-700/50">
-                      <img 
-                        src={track.albumArt} 
-                        alt={track.name} 
-                        className="w-12 h-12 rounded-md mr-4"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{track.name}</p>
-                        <p className="text-sm text-gray-400 truncate">{track.artist} • {track.duration}</p>
-                      </div>
-                      <button 
-                        onClick={() => addToPlaylist(track)}
-                        className="ml-4 p-2 bg-green-600 hover:bg-green-700 rounded-full"
-                        aria-label={`Add ${track.name} to playlist`}
-                      >
-                        <FiPlus size={20} />
-                      </button>
+          </div>
+        )}
+      </div>
+
+      {/* Mobile: Full-screen Modal (Only shows on mobile) */}
+      {showSearchModal && (
+        <div className="lg:hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-800 rounded-xl w-full max-h-[90vh] flex flex-col">
+            <div className="sticky top-0 bg-gray-800 flex justify-between items-center p-4 border-b border-gray-700">
+              <h3 className="text-xl font-semibold">
+                <FiMusic className="inline mr-2" /> 
+                Add Music
+              </h3>
+              <button
+                onClick={() => setShowSearchModal(false)}
+                className="p-1 rounded-full hover:bg-gray-700 text-white"
+                aria-label="Close modal"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <div className="p-4">
+              <div className="relative mb-4">
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  placeholder="Search all of Spotify..."
+                  className="w-full pl-10 pr-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <button
+                onClick={handleSearch}
+                className="w-full py-2 bg-purple-600 hover:bg-purple-700 rounded-lg mb-4"
+              >
+                Search
+              </button>
+              <div className="divide-y divide-gray-700">
+                {searchResults.map(track => (
+                  <div key={track.id} className="flex items-center p-3 hover:bg-gray-700/50">
+                    <img src={track.albumArt} alt={track.name} className="w-12 h-12 rounded-md mr-3" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{track.name}</p>
+                      <p className="text-sm text-gray-400 truncate">{track.artist} • {track.duration}</p>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 text-center text-gray-400">
-                  <FiSearch size={48} className="mx-auto mb-4" />
-                  <p>Search for songs to add to your playlist</p>
-                </div>
-              )}
+                    <button 
+                      onClick={() => addToPlaylist(track)}
+                      className="ml-2 p-2 bg-green-600 hover:bg-green-700 rounded-full"
+                      aria-label={`Add ${track.name} to playlist`}
+                    >
+                      <FiPlus size={18} />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
