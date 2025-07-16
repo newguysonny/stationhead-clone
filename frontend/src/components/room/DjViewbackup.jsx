@@ -209,12 +209,17 @@ const loadMoreResults = () => {
 };
 
   // remove playlist track
+   const togglePlay = (id) => {
+  const targetTrack = playlist.find(track => track.id === id);
+  if (!targetTrack) return; // Guard clause
 
-  const removeFromPlaylist = (index) => setPlaylist(playlist.filter((_, i) => i !== index));
-  const togglePlay = (id) => setPlaylist(playlist.map(track => ({
+  setPlaylist(playlist.map(track => ({
     ...track,
-    isPlaying: track.id === id ? !track.isPlaying : false
+    isPlaying: track.id === id 
+      ? !targetTrack.isPlaying // Toggle clicked track
+      : false                  // Pause others
   })));
+};
 
   // Chat actions
   const handleSendMessage = (e) => {
