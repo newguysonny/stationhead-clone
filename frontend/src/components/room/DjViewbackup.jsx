@@ -3,6 +3,7 @@ import {
   FiPlus, FiX, FiSearch, FiPlay, FiPause, FiSkipForward, FiMusic, 
   FiHeart, FiShare2, FiMessageSquare, FiMenu, FiShoppingCart, FiUser
 } from 'react-icons/fi';
+import { debounce } from './utils/debounce';
 
 const DjView = ({ spotifyToken }) => {
   // State
@@ -55,20 +56,9 @@ const searchCache = useRef({}); // Simple cache
 
   // Spotify search
   const handleSearch = async (query) => {
-  // Utils (define these outside the component)
-const debounce = (func, delay) => {
-  let timeoutId;
-  return (...args) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func(...args), delay);
-  };
-};
 
-const msToMinutes = (ms) => {
-  const minutes = Math.floor(ms / 60000);
-  const seconds = ((ms % 60000) / 1000).toFixed(0);
-  return `${minutes}:${seconds.padStart(2, '0')}`;
-};
+
+
 
 
 
