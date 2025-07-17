@@ -24,6 +24,19 @@ const trackToLocalFormat = (track, isInQueue = false) => ({
   inSpotifyQueue: isInQueue
 });
 
+// Helper functions (persistence token)
+const persistToken = (token) => {
+  localStorage.setItem('spotify_token', token);
+};
+
+const getPersistedToken = () => {
+  return localStorage.getItem('spotify_token');
+};
+
+const clearToken = () => {
+  localStorage.removeItem('spotify_token');
+};
+
 const DjView = ({ SpotifyToken }) => {
   // State
   const [localPlaylist, setLocalPlaylist] = useState([]);
@@ -36,27 +49,42 @@ const DjView = ({ SpotifyToken }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('playlist');
 
-  // API Wrapper
-  const spotifyApi = useCallback(async (endpoint, method = 'GET', body = null) => {
-    const headers = {
-      'Authorization': `Bearer ${SpotifyToken}`,
-      'Content-Type': 'application/json'
-    };
-
-    const config = { method, headers, ...(body && { body: JSON.stringify(body) }) };
-
-    try {
-      const response = await fetch(`https://api.spotify.com/v1${endpoint}`, config);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Spotify API error');
-      }
-      return response.status === 204 ? true : await response.json();
-    } catch (error) {
-      toast.error(`Spotify Error: ${error.message}`);
-      throw error;
+  // Persist new tokens on prop change
+  useEffect(() => {
+    if (SpotifyToken) {
+      persistToken(SpotifyToken);
     }
   }, [SpotifyToken]);
+
+  
+  // API Wrapper
+  const spotifyApi = useCallback(async (endpoint, method = 'GET', body = null) => {
+  const token = SpotifyToken || getPersistedToken();
+  if (!token) throw new Error('No Spotify token available');
+
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+
+  try {
+    const response = await fetch(`https://api.spotify.com/v1${endpoint}`, {
+      method,
+      headers,
+      ...(body && { body: JSON.stringify(body) })
+    });
+
+    if (response.status === 401) {
+      clearToken();
+      throw new Error('Session expired - please reconnect');
+    }
+
+    return response.status === 204 ? true : await response.json();
+  } catch (error) {
+    toast.error(`Spotify Error: ${error.message}`);
+    throw error;
+  }
+}, [SpotifyToken]);
 
   // Fetch current playback state and queue
   const fetchPlaybackState = useCallback(async () => {
