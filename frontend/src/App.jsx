@@ -7,28 +7,14 @@ import RoomPage from "./pages/RoomPage";
 import StreamingRoom from "./components/StreamingRoom";
 /*import './styles/tailwind.output.css';*/
 import './App.css'; // The processed version
-import SpotifyAuthContext  from './contexts/SpotifyAuthContext';
+import { SpotifyAuthProvider } from 'contexts/SpotifyAuthContext';
 
 export default function App() {
-  const [authState, setAuthState] = useState({
-    isConnected: false,
-    token: null
-  });
-  const connect = () => {
-    // Your auth logic (or import from SpotifyConnect.jsx)
-    SpotifyConnect();
-  };
   
   return (
     <>
-    <BrowserRouter>
-        <SpotifyAuthContext.Provider 
-        value={{
-          ...authState,
-          connect,
-          disconnect: () => setAuthState({ isConnected: false, token: null })
-        }}
-      >
+     <SpotifyAuthProvider>
+      <BrowserRouter>
       <Routes>
         <Route path="/callback" element={<RoomPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -36,8 +22,8 @@ export default function App() {
         <Route path="/rom" element={<RoomPage />} />
         <Route path="/room/:roomName" element={<StreamingRoomWrapper />} />
       </Routes>
-     </SpotifyAuthContext.Provider>
-    </BrowserRouter>
+     </BrowserRouter>
+    </SpotifyAuthProvider>
 
         
       <ToastContainer
