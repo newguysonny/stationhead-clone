@@ -65,8 +65,15 @@ const DjView = ({ spotifyToken }) => {
 
   // Memoized search handler
   const handleSearch = useCallback(async (query, offset = 0) => {
+  // 1. Validate empty query (already present)
   if (query.trim() === '') {
     setSearchResults([]);
+    return;
+  }
+
+  // 2. Validate Spotify token
+  if (!spotifyToken || typeof spotifyToken !== 'string') {
+    setNotification('Invalid Spotify token');
     return;
   }
 
@@ -86,8 +93,15 @@ const DjView = ({ spotifyToken }) => {
       { headers: { 'Authorization': `Bearer ${spotifyToken}` } }
     );
 
+    // 3. Validate HTTP response
     if (!response.ok) throw new Error(`API Error: ${response.status}`);
+
     const data = await response.json();
+
+    // 4. Validate API response structure
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      throw new Error('Invalid API response format');
+    }
 
     // Add null checks for each category
     const formattedResults = [
@@ -118,17 +132,19 @@ const DjView = ({ spotifyToken }) => {
       })) || [])
     ];
 
+
     searchCache.current[cacheKey] = formattedResults;
     setSearchResults(prev => 
       offset === 0 ? formattedResults : [...prev, ...formattedResults]
     );
+
   } catch (error) {
     console.error('Search failed:', error);
     setNotification(error.message || 'Search failed');
   } finally {
     setIsSearching(false);
   }
-}, [spotifyToken]);
+}, [spotifyToken]); // Dependency ensures token changes trigger rechecks
   
   
 
