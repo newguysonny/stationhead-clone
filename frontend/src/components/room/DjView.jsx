@@ -10,13 +10,7 @@ import { useSpotifyAuth } from '../../contexts/SpotifyAuthContext';
 
 
 const DjView = ({ spotifyToken }) => {
-   const { 
-    isConnected, 
-    status, 
-    startAuth, 
-    disconnect,
-    error 
-  } = useSpotifyAuth();
+   
   
   // State
   const [playlist, setPlaylist] = useState([
@@ -40,12 +34,12 @@ const DjView = ({ spotifyToken }) => {
 
   const [searchOffset, setSearchOffset] = useState(0);
   const searchCache = useRef({});
-//  const { isConnected, startAuth, disconnect } = useSpotifyAuth();
+ const { isConnected, startAuth, disconnect } = useSpotifyAuth();
   const [openModal, setOpenModal] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('playlist');
-//  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const [likes, setLikes] = useState(1200);
   const [listeners, setListeners] = useState(24);
   const [plays, setPlays] = useState(5800);
