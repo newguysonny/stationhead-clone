@@ -1,3 +1,5 @@
+import { useSpotifyAuth } from '../../contexts/SpotifyAuthContext';
+
 export default function SpotifyConnect({ isHost }) {
   const { 
     isConnected, 
