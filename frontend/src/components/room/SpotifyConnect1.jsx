@@ -41,7 +41,7 @@ export default function SpotifyConnect({ isHost }) {
         `https://accounts.spotify.com/authorize?${new URLSearchParams({
           client_id: clientId,
           response_type: 'code',
-          redirect_uri: window.location.origin,
+          redirect_uri: window.location.origin + '/callback',
           scope: [
             'streaming',
             'user-read-email',
@@ -75,7 +75,7 @@ export default function SpotifyConnect({ isHost }) {
                 client_id: clientId,
                 grant_type: 'authorization_code',
                 code,
-                redirect_uri: window.location.origin,
+                redirect_uri: window.location.origin + '/callback',
                 code_verifier: localStorage.getItem('spotify_verifier')
               })
             });
