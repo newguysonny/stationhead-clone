@@ -134,14 +134,16 @@ const DjView = ({ spotifyToken }) => {
     [handleSearch]
   );
 
+ 
   const handleQueryChange = (query) => {
-    setSearchQuery(query);
-    if (query.trim() === '') {
-      setSearchResults([]);
-      return;
-    }
-    debouncedSearch(query);
-  };
+  setSearchQuery(query);
+  if (query.trim() === '') {
+    debouncedSearch.cancel(); // Cancel pending debounced searches
+    setSearchResults([]); // Clear results immediately
+    return;
+  }
+  debouncedSearch(query);
+};
 
   const loadMoreResults = () => {
     const newOffset = searchOffset + 10;
