@@ -38,7 +38,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import DjView from '../components/room/DjView';
 import ListenerView from '../components/room/ListenerView';
-import SpotifyConnect from '../components/room/SpotifyConnect';
+import SpotifyConnect1 from '../components/room/SpotifyConnect1';
 
 export default function RoomPage() {
   const { roomId } = useParams();
@@ -82,7 +82,7 @@ export default function RoomPage() {
 
           {/* Spotify Connect Button */}
           <div className="bg-white rounded-lg shadow p-6 text-center">
-            <SpotifyConnect 
+            <SpotifyConnect1 
               isHost={isHost} 
               onAuthComplete={setSpotifyToken} 
               onAuthError={handleAuthError} 
