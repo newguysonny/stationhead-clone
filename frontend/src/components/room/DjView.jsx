@@ -436,23 +436,19 @@ const DjView = ({ spotifyToken }) => {
               </div>
             </div>
           </div>
-
-          <button 
-     onClick={() => {
-       if (isConnected) {
-         disconnect(); // Log out
-       } else {
-         startAuth();  // Initiate Spotify OAuth flow
-       }
-     }}
-     className={`w-full py-3 rounded-full mb-6 flex items-center justify-center gap-2 font-medium ${
-       isConnected ? 'bg-green-600' : 'bg-purple-600 hover:bg-purple-700'
-     }`}
-   >
-     <FiMusic />
-     {isConnected ? 'Connected to Spotify' : 'Connect Spotify'}
-   </button>
-
+               <button 
+        onClick={() => isConnected ? disconnect() : startAuth()}
+        disabled={status === 'loading'}
+        className={`w-full py-3 rounded-full mb-6 flex items-center justify-center gap-2 font-medium ${
+          isConnected ? 'bg-green-600' : 
+          status === 'loading' ? 'bg-gray-500' : 'bg-purple-600 hover:bg-purple-700'
+        }`}
+      >
+        <FiMusic />
+        {status === 'loading' ? 'Connecting...' : 
+         isConnected ? 'Connected to Spotify' : 'Connect Spotify'}
+      </button>
+          
           <div className="flex justify-center gap-6 mb-8 text-gray-300">
             <span className="flex items-center gap-1">▶️ {plays.toLocaleString()}</span>
             <span className="flex items-center gap-1">👥 {listeners.toLocaleString()}</span>
