@@ -6,6 +6,8 @@ import {
 } from 'react-icons/fi';
 import { debounce } from '../../utils/debounce';
 import { msToMinutes } from '../../utils/time';
+import { useSpotifyAuth } from '../../contexts/SpotifyAuthContext';
+
 
 const DjView = ({ spotifyToken }) => {
   // State
@@ -30,6 +32,7 @@ const DjView = ({ spotifyToken }) => {
 
   const [searchOffset, setSearchOffset] = useState(0);
   const searchCache = useRef({});
+  const { isConnected, startAuth, disconnect } = useSpotifyAuth();
   const [openModal, setOpenModal] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -427,14 +430,20 @@ const DjView = ({ spotifyToken }) => {
           </div>
 
           <button 
-            onClick={() => setIsConnected(!isConnected)}
-            className={`w-full py-3 rounded-full mb-6 flex items-center justify-center gap-2 font-medium ${
-              isConnected ? 'bg-green-600' : 'bg-purple-600 hover:bg-purple-700'
-            }`}
-          >
-            <FiMusic />
-            {isConnected ? 'Connected to Spotify' : 'Connect Spotify'}
-          </button>
+     onClick={() => {
+       if (isConnected) {
+         disconnect(); // Log out
+       } else {
+         startAuth();  // Initiate Spotify OAuth flow
+       }
+     }}
+     className={`w-full py-3 rounded-full mb-6 flex items-center justify-center gap-2 font-medium ${
+       isConnected ? 'bg-green-600' : 'bg-purple-600 hover:bg-purple-700'
+     }`}
+   >
+     <FiMusic />
+     {isConnected ? 'Connected to Spotify' : 'Connect Spotify'}
+   </button>
 
           <div className="flex justify-center gap-6 mb-8 text-gray-300">
             <span className="flex items-center gap-1">▶️ {plays.toLocaleString()}</span>
