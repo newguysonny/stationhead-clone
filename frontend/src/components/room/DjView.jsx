@@ -39,7 +39,7 @@ const DjView = ({ spotifyToken }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('playlist');
-  const [isConnected, setIsConnected] = useState(false);
+  //const [isConnected, setIsConnected] = useState(false);
   const [likes, setLikes] = useState(1200);
   const [listeners, setListeners] = useState(24);
   const [plays, setPlays] = useState(5800);
