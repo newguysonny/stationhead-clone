@@ -56,33 +56,15 @@ const searchCache = useRef({}); // Simple cache
   }, [messages]);
 
   // Spotify search
-  const handleSearch = async (query) => {
-
-// Debounced search to avoid rate limits
-const debouncedSearch = useMemo(
-     () => debounce(handleSearch, 300),
-     [handleSearch]  // Add dependency
-   );
-    
-// Trigger search on query change (e.g., from input field)
-const handleQueryChange = (query) => {
-  setSearchQuery(query);
-  if (query.trim() === '') {
-    setSearchResults([]);
-    return;
-  }
-  debouncedSearch(query);
-};
-
-// Main search function
-const handleSearch = async (query, offset = 0) => {
+ const handleSearch = async (query, offset = 0) => {
   const cacheKey = `${query}-${offset}`;
-  
+
   // Return cached results if available
   if (searchCache.current[cacheKey]) {
-    setSearchResults(prev => offset === 0 
-      ? searchCache.current[cacheKey] 
-      : [...prev, ...searchCache.current[cacheKey]]
+    setSearchResults(prev =>
+      offset === 0
+        ? searchCache.current[cacheKey]
+        : [...prev, ...searchCache.current[cacheKey]]
     );
     return;
   }
@@ -91,25 +73,38 @@ const handleSearch = async (query, offset = 0) => {
     const response = await fetch(
       `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track,album,playlist&limit=10&offset=${offset}`,
       {
-        headers: { 'Authorization': `Bearer ${spotifyToken}` }
+        headers: { Authorization: `Bearer ${spotifyToken}` },
       }
     );
 
     if (!response.ok) throw new Error(`API Error: ${response.status}`);
 
     const data = await response.json();
-    const formattedResults = formatSpotifyResults(data); // Extracted for clarity
+    const formattedResults = formatSpotifyResults(data);
 
     // Cache results
     searchCache.current[cacheKey] = formattedResults;
 
-    setSearchResults(prev => 
+    setSearchResults(prev =>
       offset === 0 ? formattedResults : [...prev, ...formattedResults]
     );
   } catch (error) {
     console.error('Search failed:', error);
     setNotification(error.message || 'Search failed');
   }
+};
+  const debouncedSearch = useMemo(
+  () => debounce(handleSearch, 300),
+  [handleSearch]
+);
+
+  const handleQueryChange = (query) => {
+  setSearchQuery(query);
+  if (query.trim() === '') {
+    setSearchResults([]);
+    return;
+  }
+  debouncedSearch(query);
 };
 
 // Format Spotify API response consistently
@@ -335,7 +330,7 @@ const loadMoreResults = () => {
                 type="text"
                  value={searchQuery}
                 onChange={(e) => handleQueryChange(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery, 0)}
                 placeholder="Search songs, albums, playlists..."
                 className="w-full pl-10 pr-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
@@ -590,7 +585,7 @@ const loadMoreResults = () => {
                   type="text"
                   value={searchQuery}
                 onChange={(e) => handleQueryChange(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery, 0)}
                 placeholder="Search songs, albums, playlists..."
                   className="w-full pl-10 pr-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
