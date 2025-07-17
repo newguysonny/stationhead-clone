@@ -7,7 +7,7 @@ import RoomPage from "./pages/RoomPage";
 import StreamingRoom from "./components/StreamingRoom";
 /*import './styles/tailwind.output.css';*/
 import './App.css'; // The processed version
-import SpotifyAuthProvider  from "./contexts/SpotifyAuthContext";
+import {SpotifyAuthProvider}  from "./contexts/SpotifyAuthContext";
 
 export default function App() {
   
