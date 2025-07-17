@@ -9,10 +9,28 @@ export default function SpotifyConnect({ isHost }) {
     setAuthError 
   } = useSpotifyAuth();
 
+  // PKCE Code Verifier (fixed syntax)
+  const generateCodeVerifier = (length) => {
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    return Array.from(crypto.getRandomValues(new Uint8Array(length)))
+      .map((byte) => possible[byte % possible.length])
+      .join('');
+  };
+
+  // PKCE Code Challenge (fixed syntax)
+  const generateCodeChallenge = async (verifier) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(verifier);
+    const digest = await window.crypto.subtle.digest('SHA-256', data);
+    return btoa(String.fromCharCode(...new Uint8Array(digest)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  };
+
   const handleConnect = async () => {
     try {
-      startAuth(); // Set loading state
-      
+      startAuth();
       const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
       const verifier = generateCodeVerifier(64);
       const challenge = await generateCodeChallenge(verifier);
@@ -20,7 +38,18 @@ export default function SpotifyConnect({ isHost }) {
       localStorage.setItem('spotify_verifier', verifier);
 
       const popup = window.open(
-        `https://accounts.spotify.com/authorize?${/* ... */}`,
+        `https://accounts.spotify.com/authorize?${new URLSearchParams({
+          client_id: clientId,
+          response_type: 'code',
+          redirect_uri: window.location.origin,
+          scope: [
+            'streaming',
+            'user-read-email',
+            ...(isHost ? ['user-modify-playback-state'] : [])
+          ].join(' '),
+          code_challenge_method: 'S256',
+          code_challenge: challenge,
+        })}`,
         'SpotifyAuth',
         `width=500,height=700,top=${(window.innerHeight - 700) / 2},left=${(window.innerWidth - 500) / 2}`
       );
@@ -68,7 +97,9 @@ export default function SpotifyConnect({ isHost }) {
     <button
       onClick={handleConnect}
       disabled={status === 'loading'}
-      className={/* ... */}
+      className={`bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-medium ${
+        status === 'loading' ? 'opacity-50 cursor-not-allowed' : ''
+      }`}
     >
       {status === 'loading' ? 'Connecting...' : 'Connect Spotify'}
     </button>
