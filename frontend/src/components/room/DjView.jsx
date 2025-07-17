@@ -34,6 +34,7 @@ const DjView = ({ SpotifyToken }) => {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [deviceId, setDeviceId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('playlist');
 
   // API Wrapper
   const spotifyApi = useCallback(async (endpoint, method = 'GET', body = null) => {
