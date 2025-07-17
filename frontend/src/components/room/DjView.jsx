@@ -40,7 +40,7 @@ const DjView = ({ spotifyToken }) => {
 
   const [searchOffset, setSearchOffset] = useState(0);
   const searchCache = useRef({});
-  const { isConnected, startAuth, disconnect } = useSpotifyAuth();
+//  const { isConnected, startAuth, disconnect } = useSpotifyAuth();
   const [openModal, setOpenModal] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
