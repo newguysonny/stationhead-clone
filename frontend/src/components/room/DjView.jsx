@@ -176,20 +176,37 @@ const DjView = ({ spotifyToken }) => {
     handleSearch(searchQuery, newOffset);
   };
 
-  // Consolidated playlist handler
-  const handleAddToPlaylist = async (item) => {
-    if (item.type === 'track') {
-      if (playlist.some(t => t.id === item.id)) {
-        setNotification(`${item.name} is already in the playlist`);
-        return;
-      }
-      setPlaylist([...playlist, { ...item, isPlaying: false }]);
-      setNotification(`${item.name} added to queue`);
-      return;
-    }
+  // Consolidated playlist handler add to queue and UI
 
+  const handleAddToPlaylist = async (item) => {
+  if (!spotifyToken) {
+    setNotification('Please connect to Spotify first');
+    return;
+  }
+
+  try {
     setIsLoading(true);
-    try {
+    
+    // For tracks - add directly to queue
+    if (item.type === 'track') {
+      // Add to Spotify's queue
+      const response = await fetch(`https://api.spotify.com/v1/me/player/queue?uri=${item.uri}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${spotifyToken}` }
+      });
+
+      if (!response.ok) throw new Error('Failed to add to queue');
+
+      // Also add to local state for UI
+      setPlaylist(prev => [...prev, { 
+        ...item, 
+        isPlaying: false 
+      }]);
+      
+      setNotification(`Added ${item.name} to queue`);
+    } 
+    // For albums/playlists - fetch tracks first
+    else {
       const endpoint = item.type === 'album' 
         ? `https://api.spotify.com/v1/albums/${item.id}/tracks`
         : `https://api.spotify.com/v1/playlists/${item.id}/tracks`;
@@ -199,33 +216,36 @@ const DjView = ({ spotifyToken }) => {
       });
       const data = await response.json();
 
-      const tracksToAdd = data.items
-        .map(track => ({
-          type: 'track',
-          id: track.id,
-          name: track.name,
-          artist: track.artists.map(a => a.name).join(', '),
-          duration: msToMinutes(track.duration_ms),
-          albumArt: item.albumArt,
-          uri: track.uri,
-          isPlaying: false
-        }))
-        .filter(track => !playlist.some(t => t.id === track.id));
-
-      if (tracksToAdd.length === 0) {
-        setNotification(`All tracks from ${item.name} are already in the playlist`);
-        return;
+      // Add each track to Spotify's queue
+      for (const track of data.items) {
+        await fetch(`https://api.spotify.com/v1/me/player/queue?uri=${track.uri}`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${spotifyToken}` }
+        });
       }
 
-      setPlaylist([...playlist, ...tracksToAdd]);
-      setNotification(`Added ${tracksToAdd.length} songs from ${item.name}`);
-    } catch (error) {
-      console.error('Error fetching tracks:', error);
-      setNotification('Failed to add album/playlist');
-    } finally {
-      setIsLoading(false);
+      // Update local state
+      const tracksToAdd = data.items.map(track => ({
+        type: 'track',
+        id: track.id,
+        name: track.name,
+        artist: track.artists.map(a => a.name).join(', '),
+        duration: msToMinutes(track.duration_ms),
+        albumArt: item.albumArt,
+        uri: track.uri,
+        isPlaying: false
+      }));
+
+      setPlaylist(prev => [...prev, ...tracksToAdd]);
+      setNotification(`Added ${tracksToAdd.length} songs to queue`);
     }
-  };
+  } catch (error) {
+    console.error('Error:', error);
+    setNotification(error.message || 'Failed to add to queue');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // Player controls
   const togglePlay = (id) => {
