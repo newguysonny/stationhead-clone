@@ -22,7 +22,7 @@ export default function App() {
       </Routes>
     </BrowserRouter>
 
-     {/* Toast Container - placed outside BrowserRouter but in the same fragment */}
+     /* Toast Container - placed outside BrowserRouter but in the same fragment */
       <ToastContainer
         position="bottom-right"
         autoClose={3000}
