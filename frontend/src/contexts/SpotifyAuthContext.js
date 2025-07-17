@@ -1,5 +1,4 @@
 //src/contexts/SpotifyAuthContext.js
-
 import { createContext, useContext, useState } from 'react';
 
 const SpotifyAuthContext = createContext();
