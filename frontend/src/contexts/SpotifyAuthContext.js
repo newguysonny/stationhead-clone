@@ -15,7 +15,7 @@ export const SpotifyAuthProvider = ({ children }) => {
     };
   });
 
-  // Check for token in URL (fallback for non-popup flows)
+  // Check for token in URL (fallback for non-popup .flows)
   useEffect(() => {
     const handleTokenFromURL = () => {
       const hash = window.location.hash.substring(1);
