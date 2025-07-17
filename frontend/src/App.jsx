@@ -7,8 +7,7 @@ import RoomPage from "./pages/RoomPage";
 import StreamingRoom from "./components/StreamingRoom";
 /*import './styles/tailwind.output.css';*/
 import './App.css'; // The processed version
-// src/contexts/SpotifyAuthContext.js
-import { SpotifyAuthContext } from '../../contexts/SpotifyAuthContext';
+import SpotifyAuthContext  from './contexts/SpotifyAuthContext';
 
 export default function App() {
   const [authState, setAuthState] = useState({
