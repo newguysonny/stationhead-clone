@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "react": "^18.2.0",
+    "react-toastify": "^latest-version",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",
     "react-icons": "^4.12.0",
