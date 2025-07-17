@@ -10,6 +10,14 @@ import { useSpotifyAuth } from '../../contexts/SpotifyAuthContext';
 
 
 const DjView = ({ spotifyToken }) => {
+   const { 
+    isConnected, 
+    status, 
+    startAuth, 
+    disconnect,
+    error 
+  } = useSpotifyAuth();
+  
   // State
   const [playlist, setPlaylist] = useState([
     {
