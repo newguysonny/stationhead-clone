@@ -10,8 +10,6 @@ import './App.css'; // The processed version
 
 
 
-
-
 export default function App() {
   return (
     <BrowserRouter>
