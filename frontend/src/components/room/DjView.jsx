@@ -65,68 +65,72 @@ const DjView = ({ spotifyToken }) => {
 
   // Memoized search handler
   const handleSearch = useCallback(async (query, offset = 0) => {
-    const cacheKey = `${query}-${offset}`;
-    
-    if (searchCache.current[cacheKey]) {
-      setSearchResults(prev => offset === 0 
-        ? searchCache.current[cacheKey] 
-        : [...prev, ...searchCache.current[cacheKey]]
-      );
-      return;
-    }
+  if (query.trim() === '') {
+    setSearchResults([]);
+    return;
+  }
 
-    setIsSearching(true);
-    try {
-      const response = await fetch(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track,album,playlist&limit=10&offset=${offset}`,
-        { headers: { 'Authorization': `Bearer ${spotifyToken}` } }
-      );
+  const cacheKey = `${query}-${offset}`;
+  if (searchCache.current[cacheKey]) {
+    setSearchResults(prev => offset === 0 
+      ? searchCache.current[cacheKey] 
+      : [...prev, ...searchCache.current[cacheKey]]
+    );
+    return;
+  }
 
-      if (!response.ok) throw new Error(`API Error: ${response.status}`);
-      const data = await response.json();
-      
-      const formattedResults = [
-        ...(data.tracks?.items.map(track => ({
-          type: 'track',
-          id: track.id,
-          name: track.name,
-          artist: track.artists.map(a => a.name).join(', '),
-          duration: msToMinutes(track.duration_ms),
-          albumArt: track.album.images[0]?.url,
-          uri: track.uri
-        })) || []),
-        ...(data.albums?.items.map(album => ({
-          type: 'album',
-          id: album.id,
-          name: album.name,
-          artist: album.artists.map(a => a.name).join(', '),
-          albumArt: album.images[0]?.url,
-          uri: album.uri,
-          release_date: album.release_date,
-          total_tracks: album.total_tracks
-        })) || []),
-        ...(data.playlists?.items.map(playlist => ({
-          type: 'playlist',
-          id: playlist.id,
-          name: playlist.name,
-          artist: playlist.owner.display_name,
-          albumArt: playlist.images[0]?.url,
-          uri: playlist.uri,
-          total_tracks: playlist.tracks.total
-        })) || [])
-      ];
+  setIsSearching(true);
+  try {
+    const response = await fetch(
+      `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track,album,playlist&limit=10&offset=${offset}`,
+      { headers: { 'Authorization': `Bearer ${spotifyToken}` } }
+    );
 
-      searchCache.current[cacheKey] = formattedResults;
-      setSearchResults(prev => 
-        offset === 0 ? formattedResults : [...prev, ...formattedResults]
-      );
-    } catch (error) {
-      console.error('Search failed:', error);
-      setNotification(error.message || 'Search failed');
-    } finally {
-      setIsSearching(false);
-    }
-  }, [spotifyToken]);
+    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+    const data = await response.json();
+
+    // Add null checks for each category
+    const formattedResults = [
+      ...(data.tracks?.items?.map(track => ({
+        type: 'track',
+        id: track?.id || '',
+        name: track?.name || 'Unknown Track',
+        artist: track?.artists?.map(a => a.name).join(', ') || 'Unknown Artist',
+        duration: track?.duration_ms ? msToMinutes(track.duration_ms) : '0:00',
+        albumArt: track?.album?.images?.[0]?.url || '',
+        uri: track?.uri || ''
+      })) || []),
+      ...(data.albums?.items?.map(album => ({
+        type: 'album',
+        id: album?.id || '',
+        name: album?.name || 'Unknown Album',
+        artist: album?.artists?.map(a => a.name).join(', ') || 'Unknown Artist',
+        albumArt: album?.images?.[0]?.url || '',
+        uri: album?.uri || ''
+      })) || []),
+      ...(data.playlists?.items?.map(playlist => ({
+        type: 'playlist',
+        id: playlist?.id || '',
+        name: playlist?.name || 'Unknown Playlist',
+        artist: playlist?.owner?.display_name || 'Unknown Owner',
+        albumArt: playlist?.images?.[0]?.url || '',
+        uri: playlist?.uri || ''
+      })) || [])
+    ];
+
+    searchCache.current[cacheKey] = formattedResults;
+    setSearchResults(prev => 
+      offset === 0 ? formattedResults : [...prev, ...formattedResults]
+    );
+  } catch (error) {
+    console.error('Search failed:', error);
+    setNotification(error.message || 'Search failed');
+  } finally {
+    setIsSearching(false);
+  }
+}, [spotifyToken]);
+  
+  
 
   // Debounced search
   const debouncedSearch = useMemo(
