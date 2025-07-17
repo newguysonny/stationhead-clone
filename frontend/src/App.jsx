@@ -8,9 +8,7 @@ import StreamingRoom from "./components/StreamingRoom";
 /*import './styles/tailwind.output.css';*/
 import './App.css'; // The processed version
 // src/contexts/SpotifyAuthContext.js
-import { initiateSpotifyAuth } from '../components/SpotifyConnect';
-
-
+import { SpotifyAuthContext } from '../../contexts/SpotifyAuthContext';
 
 export default function App() {
   const [authState, setAuthState] = useState({
@@ -19,6 +17,7 @@ export default function App() {
   });
   const connect = () => {
     // Your auth logic (or import from SpotifyConnect.jsx)
+    SpotifyConnect();
   };
   
   return (
