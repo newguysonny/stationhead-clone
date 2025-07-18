@@ -1,3 +1,5 @@
+import { SpotifyPlayerService } from '../../services/spotifyPlayer';
+
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { 
   FiPlus, FiX, FiSearch, FiPlay, FiPause, FiSkipForward, FiMusic, 
@@ -13,6 +15,25 @@ const DjView = ({ spotifyToken }) => {
    
   
   // State
+  const [playerService, setPlayerService] = useState(null);
+  
+    // Initialize on mount
+  useEffect(() => {
+    if (window.Spotify && spotifyToken) {
+      const service = new SpotifyPlayerService(spotifyToken, {
+        onDeviceReady: setActiveDeviceId,
+        onPlaybackUpdate: (state) => {
+          setCurrentSong(state.currentTrack);
+          // Update other state as needed
+        }
+      });
+      service.connect();
+      setPlayerService(service);
+
+      return () => service.disconnect();
+    }
+  }, [spotifyToken]);
+  
   const [playlist, setPlaylist] = useState([
     {
       id: '1',
@@ -31,7 +52,10 @@ const DjView = ({ spotifyToken }) => {
       isPlaying: false
     }
   ]);
+   
 
+
+  
   const [searchOffset, setSearchOffset] = useState(0);
   const searchCache = useRef({});
  const { isConnected, startAuth, disconnect } = useSpotifyAuth();
