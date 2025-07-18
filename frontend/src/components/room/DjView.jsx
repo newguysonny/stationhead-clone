@@ -43,6 +43,8 @@ const DjView = ({ spotifyToken }) => {
   const [likes, setLikes] = useState(1200);
   const [listeners, setListeners] = useState(24);
   const [plays, setPlays] = useState(5800);
+  const [activeDeviceId, setActiveDeviceId] = useState(null);
+  const [deviceLoading, setDeviceLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [notification, setNotification] = useState(null);
   const [messages, setMessages] = useState([
@@ -68,6 +70,56 @@ const DjView = ({ spotifyToken }) => {
     };
   }, []);
 
+  //CREATE DEVICE CONNECTION HANDLER
+  const ensureDeviceConnection = async () => {
+  if (activeDeviceId) return true;
+
+  setDeviceLoading(true);
+  try {
+    // Get available devices
+    const devicesRes = await fetch('https://api.spotify.com/v1/me/player/devices', {
+      headers: { 'Authorization': `Bearer ${spotifyToken}` }
+    });
+    
+    const { devices } = await devicesRes.json();
+    
+    // Try to find an active device first
+    const activeDevice = devices.find(d => d.is_active);
+    if (activeDevice) {
+      setActiveDeviceId(activeDevice.id);
+      return true;
+    }
+
+    // If no active device, try to transfer playback to web player
+    const webPlayer = devices.find(d => d.type === 'Web Player') || devices[0];
+    if (!webPlayer) throw new Error('No available devices');
+
+    await fetch('https://api.spotify.com/v1/me/player', {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${spotifyToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        device_ids: [webPlayer.id],
+        play: false
+      })
+    });
+
+    setActiveDeviceId(webPlayer.id);
+    return true;
+  } catch (error) {
+    console.error('Device connection failed:', error);
+    setNotification('Connect to a Spotify device first');
+    return false;
+  } finally {
+    setDeviceLoading(false);
+  }
+};
+
+
+
+  
   //SYNC EFFECT FOR QUEUE CHANGES
   useEffect(() => {
   let isMounted = true; // Track if component is still mounted
@@ -265,8 +317,10 @@ const DjView = ({ spotifyToken }) => {
   };
 
   // Consolidated playlist handler add to queue and UI
-
+  //ADDTOPLAYLIST HANDLER
   const handleAddToPlaylist = async (item) => {
+   const deviceReady = await ensureDeviceConnection();
+  if (!deviceReady) return;
   if (!spotifyToken) {
     setNotification('Please connect to Spotify first');
     return;
@@ -338,6 +392,8 @@ const DjView = ({ spotifyToken }) => {
  // REMOVE FROM PLAYLIST AND RECONCILE WITH PLAYER STATES AND QUEUE
   
   const removeFromPlaylist = async (index) => {
+    const deviceReady = await ensureDeviceConnection();
+    if (!deviceReady) return;
   const trackToRemove = playlist[index];
   
   // Optimistic UI update
@@ -378,8 +434,10 @@ const DjView = ({ spotifyToken }) => {
 
   // Add these player control functions near your other handlers
 const playTrack = async (uri) => {
+  const deviceReady = await ensureDeviceConnection();
+  if (!deviceReady) return;
   try {
-    const response = await fetch(`https://api.spotify.com/v1/me/player/play`, {
+    await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${activeDeviceId}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${spotifyToken}`,
