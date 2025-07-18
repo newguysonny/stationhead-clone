@@ -247,16 +247,7 @@ const DjView = ({ spotifyToken }) => {
   }
 };
 
-  // Player controls
-  const togglePlay = (id) => {
-    const targetTrack = playlist.find(track => track.id === id);
-    if (!targetTrack) return;
-    setPlaylist(playlist.map(track => ({
-      ...track,
-      isPlaying: track.id === id ? !targetTrack.isPlaying : false
-    })));
-  };
-
+  
   const removeFromPlaylist = (index) => {
     if (index < 0 || index >= playlist.length || playlist.length === 0) return;
     const wasPlaying = playlist[index].isPlaying;
@@ -281,40 +272,144 @@ const DjView = ({ spotifyToken }) => {
     }
   };
 
-  // Player Controls Component
-  const PlayerControls = () => (
-    <div className="sticky bottom-0 bg-gray-800 border-t border-gray-700 p-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img 
-            src={currentSong?.albumArt} 
-            alt="Now Playing" 
-            className="w-10 h-10 rounded-md"
-          />
-          <div className="min-w-0">
-            <p className="font-medium text-sm truncate">{currentSong?.name || 'No track'}</p>
-            <p className="text-xs text-gray-400 truncate">{currentSong?.artist || 'Select track'}</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button className="p-2 hover:bg-gray-700 rounded-full">
-            <FiSkipForward className="transform rotate-180" size={18} />
-          </button>
-          <button 
-            onClick={() => currentSong && togglePlay(currentSong.id)}
-            className="p-2 bg-purple-600 hover:bg-purple-700 rounded-full"
-            disabled={!currentSong}
-          >
-            {currentSong?.isPlaying ? <FiPause size={18} /> : <FiPlay size={18} />}
-          </button>
-          <button className="p-2 hover:bg-gray-700 rounded-full">
-            <FiSkipForward size={18} />
-          </button>
+  // Add these player control functions near your other handlers
+const playTrack = async (uri) => {
+  try {
+    const response = await fetch(`https://api.spotify.com/v1/me/player/play`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${spotifyToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ uris: [uri] })
+    });
+
+    if (!response.ok) throw new Error('Playback failed');
+    
+    // Update local state
+    setPlaylist(prev => prev.map(track => ({
+      ...track,
+      isPlaying: track.uri === uri
+    })));
+
+  } catch (error) {
+    console.error('Play error:', error);
+    setNotification(error.message || 'Failed to play track');
+  }
+};
+
+const togglePlayback = async () => {
+  try {
+    const response = await fetch(`https://api.spotify.com/v1/me/player/${currentSong?.isPlaying ? 'pause' : 'play'}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${spotifyToken}` }
+    });
+
+    if (!response.ok) throw new Error('Playback toggle failed');
+    
+    // Toggle local state
+    setPlaylist(prev => prev.map(track => ({
+      ...track,
+      isPlaying: track.id === currentSong?.id ? !currentSong.isPlaying : false
+    })));
+
+  } catch (error) {
+    console.error('Playback toggle error:', error);
+    setNotification(error.message || 'Failed to toggle playback');
+  }
+};
+
+const skipToNext = async () => {
+  try {
+    const response = await fetch(`https://api.spotify.com/v1/me/player/next`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${spotifyToken}` }
+    });
+
+    if (!response.ok) throw new Error('Skip failed');
+    
+    // Note: You might want to fetch the current state from Spotify here
+    // This is a simplified version that just moves to the next track in local state
+    const currentIndex = playlist.findIndex(track => track.isPlaying);
+    if (currentIndex >= 0 && currentIndex < playlist.length - 1) {
+      setPlaylist(prev => prev.map((track, i) => ({
+        ...track,
+        isPlaying: i === currentIndex + 1
+      })));
+    }
+
+  } catch (error) {
+    console.error('Skip error:', error);
+    setNotification(error.message || 'Failed to skip track');
+  }
+};
+
+const skipToPrevious = async () => {
+  try {
+    const response = await fetch(`https://api.spotify.com/v1/me/player/previous`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${spotifyToken}` }
+    });
+
+    if (!response.ok) throw new Error('Previous failed');
+    
+    // Simplified local state update
+    const currentIndex = playlist.findIndex(track => track.isPlaying);
+    if (currentIndex > 0) {
+      setPlaylist(prev => prev.map((track, i) => ({
+        ...track,
+        isPlaying: i === currentIndex - 1
+      })));
+    }
+
+  } catch (error) {
+    console.error('Previous error:', error);
+    setNotification(error.message || 'Failed to go to previous track');
+  }
+};
+
+// Updated PlayerControls component
+const PlayerControls = () => (
+  <div className="sticky bottom-0 bg-gray-800 border-t border-gray-700 p-3">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <img 
+          src={currentSong?.albumArt} 
+          alt="Now Playing" 
+          className="w-10 h-10 rounded-md"
+        />
+        <div className="min-w-0">
+          <p className="font-medium text-sm truncate">{currentSong?.name || 'No track'}</p>
+          <p className="text-xs text-gray-400 truncate">{currentSong?.artist || 'Select track'}</p>
         </div>
       </div>
+      <div className="flex gap-2">
+        <button 
+          onClick={skipToPrevious}
+          className="p-2 hover:bg-gray-700 rounded-full"
+          disabled={!currentSong}
+        >
+          <FiSkipForward className="transform rotate-180" size={18} />
+        </button>
+        <button 
+          onClick={togglePlayback}
+          className="p-2 bg-purple-600 hover:bg-purple-700 rounded-full"
+          disabled={!currentSong}
+        >
+          {currentSong?.isPlaying ? <FiPause size={18} /> : <FiPlay size={18} />}
+        </button>
+        <button 
+          onClick={skipToNext}
+          className="p-2 hover:bg-gray-700 rounded-full"
+          disabled={!currentSong}
+        >
+          <FiSkipForward size={18} />
+        </button>
+      </div>
     </div>
-  );
-
+  </div>
+);
+  
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Mobile Header */}
