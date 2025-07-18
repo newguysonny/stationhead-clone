@@ -68,6 +68,94 @@ const DjView = ({ spotifyToken }) => {
     };
   }, []);
 
+  //SYNC EFFECT FOR QUEUE CHANGES
+  useEffect(() => {
+  let isMounted = true; // Track if component is still mounted
+  const syncWithSpotify = async () => {
+    if (!spotifyToken || !isConnected || !isMounted) return;
+    
+    setIsSyncing(true);
+    try {
+      // 1. Get current playback state and queue from Spotify
+      const [playerRes, queueRes] = await Promise.all([
+        fetch('https://api.spotify.com/v1/me/player', {
+          headers: { 'Authorization': `Bearer ${spotifyToken}` }
+        }),
+        fetch('https://api.spotify.com/v1/me/player/queue', {
+          headers: { 'Authorization': `Bearer ${spotifyToken}` }
+        })
+      ]);
+
+      // 2. Check if component is still mounted before proceeding
+      if (!isMounted) return;
+
+      // 3. Check if responses are valid
+      if (!playerRes.ok || !queueRes.ok) {
+        if (playerRes.status === 401) {
+          // Handle token expiration
+          disconnect();
+        }
+        return;
+      }
+
+      const playerState = await playerRes.json();
+      const queueState = await queueRes.json();
+
+      // 4. Check mounted state again after async operations
+      if (!isMounted) return;
+
+      // 5. Get currently playing track URI
+      const currentUri = playerState?.item?.uri;
+      const currentContextUri = playerState?.context?.uri;
+
+      // 6. Enhanced sync logic
+      setPlaylist(prev => {
+        // Filter out tracks not in Spotify's queue/context
+        const validTracks = prev.filter(track => {
+          const inQueue = queueState.queue.some(q => q.uri === track.uri);
+          const inContext = currentContextUri && track.uri.startsWith(currentContextUri);
+          return inQueue || inContext || track.uri === currentUri;
+        });
+
+        // If no changes detected, just update playing status
+        if (validTracks.length === prev.length) {
+          return prev.map(track => ({
+            ...track,
+            isPlaying: track.uri === currentUri
+          }));
+        }
+
+        // Return filtered list with updated playing status
+        return validTracks.map(track => ({
+          ...track,
+          isPlaying: track.uri === currentUri
+        }));
+      });
+
+    } catch (error) {
+      console.error('Sync error:', error);
+      if (isMounted) {
+        setNotification('Sync failed - ' + error.message);
+      }
+    } finally {
+      if (isMounted) {
+        setIsSyncing(false);
+      }
+    }
+  };
+
+  // Initial sync
+  syncWithSpotify();
+  
+  // Periodic sync every 10 seconds
+  const syncInterval = setInterval(syncWithSpotify, 10000);
+  
+  return () => {
+    isMounted = false;
+    clearInterval(syncInterval);
+  };
+}, [spotifyToken, isConnected, disconnect]); // Removed playlist from dependencies to prevent loops
+
   // Memoized search handler
   const handleSearch = useCallback(async (query, offset = 0) => {
   // 1. Validate empty query (already present)
