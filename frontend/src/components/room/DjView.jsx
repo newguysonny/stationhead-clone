@@ -247,16 +247,32 @@ const DjView = ({ spotifyToken }) => {
   }
 };
 
+ // REMOVE FROM PLAYLIST AND RECONCILE WITH PLAYER STATES AND QUEUE
   
-  const removeFromPlaylist = (index) => {
-    if (index < 0 || index >= playlist.length || playlist.length === 0) return;
-    const wasPlaying = playlist[index].isPlaying;
-    const newPlaylist = playlist.filter((_, i) => i !== index);
-    setPlaylist(wasPlaying && newPlaylist.length > 0 
-      ? newPlaylist.map((track, i) => ({ ...track, isPlaying: i === 0 }))
-      : newPlaylist
-    );
-  };
+  const removeFromPlaylist = async (index) => {
+  const trackToRemove = playlist[index];
+  
+  // Optimistic UI update
+  setPlaylist(prev => prev.filter((_, i) => i !== index));
+
+  try {
+    // If removing currently playing track, skip to next
+    if (trackToRemove.isPlaying) {
+      await fetch('https://api.spotify.com/v1/me/player/next', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${spotifyToken}` }
+      });
+    }
+    
+    // Let the periodic sync handle the state reconciliation
+    setNotification(`Skipping ${trackToRemove.name}...`);
+    
+  } catch (error) {
+    // Revert UI if Spotify operation fails
+    setPlaylist(prev => [...prev.slice(0, index), trackToRemove, ...prev.slice(index)]);
+    setNotification('Failed to skip track');
+  }
+};
 
   // Chat actions
   const handleSendMessage = (e) => {
