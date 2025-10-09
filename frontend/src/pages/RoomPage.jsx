@@ -39,6 +39,7 @@ import { useParams } from 'react-router-dom';
 import DjView from '../components/room/DjView';
 import ListenerView from '../components/room/ListenerView';
 import SpotifyConnect from '../components/room/SpotifyConnect';
+import CrewStatusCard from "../components/room/CrewStatusCard";
 
 export default function RoomPage() {
   const { roomId } = useParams();
@@ -72,6 +73,7 @@ export default function RoomPage() {
               {isHost ? 'You are the host' : 'You are a listener'}
             </p>
           </div>
+          <CrewStatusCard status="active" />
 
           {/* Auth Status */}
           {authError && (
